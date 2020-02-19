@@ -1,0 +1,10 @@
+{
+  "medieval": {"start_date": "0974-01-01", "end_date": "1485-12-31"},
+  "early-modern": {"start_date": "1485-01-01", "end_date": "1750-12-31"},
+  "empire-and-industry": {"start_date": "1750-01-01", "end_date": "1850-12-31"},
+  "victorians": {"start_date": "1850-01-01", "end_date": "1901-12-31"},
+  "early-20th-century": {"start_date": "1901-01-01", "end_date": "1918-12-31"},
+  "interwar": {"start_date": "1918-01-01", "end_date": "1939-12-31"},
+  "second-world-war": {"start_date": "1939-01-01", "end_date": "1945-12-31"},
+  "postwar": {"start_date": "1945-01-01", "end_date": "2100-12-31"}
+}
