@@ -31,7 +31,6 @@ import certifi
 from collections import OrderedDict
 from typing import Dict, Optional, Union, List, Tuple
 import time
-import requests
 import gzip
 
 
@@ -56,8 +55,8 @@ else:
 if not guides and not integer_map:
     guides, integer_map = load_guide_data()
 
-
-with gzip.open("taxonomy_datafiles/taxonomy_ab.json.gz", "rb") as f:
+#  Just load a small taxonomy data file to initialise the global
+with gzip.open("taxonomy_datafiles/taxonomy_eu.json.gz", "rb") as f:
     taxonomy_data = json.loads(f.read())
 
 
@@ -274,11 +273,11 @@ def make_canonical(row_dict: Dict) -> Dict:
         row_dict["catalogue_ref"], row_dict["path"], guides, integer_map
     )
     # 11. Identify which taxonomy terms are associated with this object
-    # if row_dict.get("catalogue_ref"):
-    #     t = taxonomy_data.get(row_dict["catalogue_ref"])
-    #     if t:
-    #         row_dict["iaid"] = t.get("iaid")
-    #         row_dict["subjects"] = t.get("taxonomy_ids")
+    if row_dict.get("catalogue_ref"):
+        t = taxonomy_data.get(row_dict["catalogue_ref"])
+        if t:
+            row_dict["iaid"] = t.get("iaid")
+            row_dict["subjects"] = t.get("taxonomy_ids")
     return row_dict
 
 
@@ -866,8 +865,12 @@ def process_data(
     if lettercode:  # If a lettercode is passed in as a parameter, just ingest this.
         working_lettercodes = [lett for lett in lettercodes_tuples if lett[0] == lettercode]
     else:
-        if start and end:  # If a range, e.g. "AB" to "C" is passed in, ingest this range of lettercodes
-            working_lettercodes = lettercodes_tuples[lettercodes_list.index(start): lettercodes_list.index(end) + 1]
+        if (
+            start and end
+        ):  # If a range, e.g. "AB" to "C" is passed in, ingest this range of lettercodes
+            working_lettercodes = lettercodes_tuples[
+                lettercodes_list.index(start) : lettercodes_list.index(end) + 1
+            ]
         else:  # Just ingest everything
             working_lettercodes = lettercodes_tuples
     print(f"Working lettercodes: {working_lettercodes}")
