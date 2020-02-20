@@ -37,9 +37,9 @@ def load_guide_data():
     :return: guides
     :rtype: dict
     """
-    with open("flattened_guides.json", "r") as guides:
+    with open("staticfiles/flattened_guides.json", "r") as guides:
         guides = json.load(guides)
-    with open("researchguide_map.json", "r") as f:
+    with open("staticfiles/researchguide_map.json", "r") as f:
         integer_map = json.load(f)
     return guides, integer_map
 
@@ -68,7 +68,7 @@ def create_integer_map():
 
     :return:
     """
-    with open("flattened_guides.json", "r") as f:
+    with open("staticfiles/flattened_guides.json", "r") as f:
         guides = json.load(f)
     guide_list = []
     for _, x in guides.items():
@@ -81,7 +81,7 @@ def create_integer_map():
         a["key"] = i + 1
     z = range(1, len(all_) + 1)
     all_guides = dict(zip(z, [{"id": item["id"], "title": item["title"]} for item in all_]))
-    with open(f"researchguide_map.json", "w") as rf:
+    with open(f"staticfiles/researchguide_map.json", "w") as rf:
         json.dump(all_guides, rf, indent=2, sort_keys=True)
     return all_guides
 
@@ -145,13 +145,13 @@ def invert_guides():
         guides, integer_map = load_guide_data()
     # print(json.dumps(integer_map, indent=2, sort_keys=True))
     inverted = {v["id"]: {"key": int(k), "title": v["title"]} for k, v in integer_map.items()}
-    with open("decorated_guides.json", "r") as rf:
+    with open("staticfiles/decorated_guides.json", "r") as rf:
         decorated_guides = json.load(rf)
     for k, v in inverted.items():
         for guide in decorated_guides:
             if guide["id"] == k:
                 v.update(guide)
-    with open("inverse_researchguide_map.json", "w") as f:
+    with open("staticfiles/inverse_researchguide_map.json", "w") as f:
         json.dump(inverted, f, indent=2, sort_keys=True)
 
 
