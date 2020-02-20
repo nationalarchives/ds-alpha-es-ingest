@@ -1,0 +1,346 @@
+{
+  "settings": {
+    "index": {
+      "refresh_interval": "-1"
+    }
+  },
+  "mappings": {
+    "_source": {
+      "enabled": "true"
+    },
+    "properties": {
+      "also_matches": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "highlight": {
+        "type": "boolean"
+      },
+      "catalogue_ref": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "title": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "first_date": {
+        "type": "date"
+      },
+      "last_date": {
+        "type": "date"
+      },
+      "class_hdr_no": {
+        "type": "long",
+        "fields": {
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "class_no": {
+        "type": "long",
+        "fields": {
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "division_no": {
+        "type": "long",
+        "fields": {
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "id": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          },
+          "tree": {
+            "type": "text",
+            "analyzer": "custom_path_tree"
+          },
+          "tree_reversed": {
+            "type": "text",
+            "analyzer": "custom_path_tree_reversed"
+          }
+        }
+      },
+      "item_ref": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "letter_code": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "level": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "matches": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "eras": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "first_date_obj": {
+        "properties": {
+          "century": {
+            "type": "short"
+          },
+          "day": {
+            "type": "short"
+          },
+          "month": {
+            "type": "short"
+          },
+          "year": {
+            "type": "short"
+          }
+        }
+      },
+      "last_date_obj": {
+        "properties": {
+          "century": {
+            "type": "short"
+          },
+          "day": {
+            "type": "short"
+          },
+          "month": {
+            "type": "short"
+          },
+          "year": {
+            "type": "short"
+          }
+        }
+      },
+      "research_guides": {
+        "properties": {
+          "All": {
+            "type": "short"
+          },
+          "Department": {
+            "type": "short"
+          },
+          "Object": {
+            "type": "short"
+          },
+          "Series": {
+            "type": "short"
+          }
+        }
+      },
+      "path": {
+        "properties": {
+          "Department": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              },
+              "raw": {
+                "type": "keyword",
+                "index": "true"
+              }
+            }
+          },
+          "Division": {
+            "type": "long",
+            "fields": {
+              "raw": {
+                "type": "keyword",
+                "index": "true"
+              }
+            }
+          },
+          "Item": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              },
+              "raw": {
+                "type": "keyword",
+                "index": "true"
+              }
+            }
+          },
+          "Piece": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              },
+              "raw": {
+                "type": "keyword",
+                "index": "true"
+              }
+            }
+          },
+          "Series": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              },
+              "raw": {
+                "type": "keyword",
+                "index": "true"
+              }
+            }
+          },
+          "Subseries": {
+            "type": "long",
+            "fields": {
+              "raw": {
+                "type": "keyword",
+                "index": "true"
+              }
+            }
+          },
+          "Subsubseries": {
+            "type": "long",
+            "fields": {
+              "raw": {
+                "type": "keyword",
+                "index": "true"
+              }
+            }
+          }
+        }
+      },
+      "piece_ref": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "series": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "subclass_no": {
+        "type": "long",
+        "fields": {
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      },
+      "subheader_no": {
+        "type": "long",
+        "fields": {
+          "raw": {
+            "type": "keyword",
+            "index": "true"
+          }
+        }
+      }
+    }
+  }
+}
