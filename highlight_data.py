@@ -52,7 +52,7 @@ def get_highlights(catalogue_reference):
 
 
 def identify_highlights():
-    input_file = csv.DictReader(open("curated_items.csv"))
+    input_file = csv.DictReader(open("staticfiles/curated_items.csv"))
     for row in input_file:
         item = {k.lower().strip().replace(" ", "_"): v for k, v in row.items() if v}
         key = item["catalogue_reference"]
