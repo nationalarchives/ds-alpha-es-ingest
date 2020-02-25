@@ -1,11 +1,19 @@
-from flask import Flask, request, jsonify, abort, render_template
+from flask import Flask, request, jsonify, abort, stream_with_context, Response
 from flask_cors import CORS
 from flask_executor import Executor
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import pyodbc
 import settings
 from elasticsearch import Elasticsearch
 import certifi
+from es_docs import process_data
+import logging
+from waitress import serve
 
+logger = logging.getLogger('waitress')
+logger.setLevel(logging.DEBUG)
 
 app = Flask(__name__)
 CORS(app)
@@ -36,13 +44,21 @@ def ingest():
     es_port = request.args.get("es_port", default=settings.es_port)
     es_host = request.args.get("es_host", default=settings.es_host)
     action = bool(request.args.get("action", default=None))
-    settings_dict ={"lettercode": lettercode, "start": start, "end": end, "es_index": es_index, "es_port": es_port,
-                    "es_host": es_host,
-                    "ingest": action,
-                    "settings.ildb": [settings.ildb_host,
-                                      settings.ildb_port,
-                                      settings.ildb_user,
-                                      settings.ildb_password]}
+    settings_dict = {
+        "lettercode": lettercode,
+        "start": start,
+        "end": end,
+        "es_index": es_index,
+        "es_port": es_port,
+        "es_host": es_host,
+        "ingest": action,
+        "settings.ildb": [
+            settings.ildb_host,
+            settings.ildb_port,
+            settings.ildb_user,
+            settings.ildb_password,
+        ],
+    }
     if settings.ildb_host and settings.ildb_user and settings.ildb_password and settings.ildb_port:
         ildb_connection = pyodbc.connect(
             server=settings.ildb_host,
@@ -71,8 +87,26 @@ def ingest():
         es = None
     settings_dict["ildb_connection"] = bool(ildb_connection)
     settings_dict["es_connection"] = bool(es)
-    return jsonify(settings_dict)
+    if es and ildb_connection:
+        print("Got a connection")
+        return Response(
+            stream_with_context(
+                process_data(
+                    elastic=es,
+                    elastic_index=es_index,
+                    start=start,
+                    end=end,
+                    lettercode=lettercode,
+                    verbosity=False,
+                    ingest=False,
+                    database_connection=ildb_connection,
+                )
+            )
+        )
+    else:
+        return jsonify(settings_dict)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # app.run(debug=True)
+    serve(app, port=8000)
