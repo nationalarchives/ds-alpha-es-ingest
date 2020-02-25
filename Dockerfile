@@ -29,4 +29,6 @@ RUN ls /opt/ingest
 
 RUN printenv
 
-CMD gunicorn --log-level debug -t 300 -w 4 -b 0.0.0.0:8000 web:app
+#CMD gunicorn --log-level debug -k gevent -t 1000 --graceful-timeout 1000 --keep-alive 300 --threads 20 -w 4 -b 0.0.0.0:8000 app:app
+# CMD waitress-serve --port=8000 --channel-timeout=6000 app:app
+CMD python app.py

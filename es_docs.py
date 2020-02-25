@@ -481,7 +481,10 @@ def process_data(
             elastic.indices.put_settings(index=elastic_index, body=es_index_settings)
     # 2. Check I can actually connect to Elasticsearch
     if not elastic.ping:  # Can't connect to Elasticsearch
-        return False
+        # return False
+        yield "Elasticsearch connection: Bad<br>"
+    else:
+        yield "Elasticsearch connection: Good<br>"
     # 3. Set up the database connection cursor
     crsr = database_connection.cursor()
     # 4. Get the lettercodes to iterate over
@@ -510,14 +513,17 @@ def process_data(
             ]
         else:  # Just ingest everything
             working_lettercodes = lettercodes_tuples
-    print(f"Working lettercodes: {working_lettercodes}")
+    yield f"Working lettercodes: {working_lettercodes}<br>"
     # 6. Iterate the set of lettercodes to be ingested
     for lettercode, lettercode_title in working_lettercodes:
+        yield f"Working on {lettercode}: {lettercode_title}, ingest: {ingest}<br>"
         #  7. Load the sharded taxonomy file and load into a global variable for reuse
         global taxonomy_data
         shard = "".join([x for x in lettercode[0:2] if x.isalpha()]).lower()
         with gzip.open(f"taxonomy_datafiles/taxonomy_{shard}.json.gz", "rb") as taxonomy_file:
+            yield "Loading taxonomy data from disk<br>"
             taxonomy_data = json.loads(taxonomy_file.read())
+            yield "Loaded taxonomy data from disk<br>"
         # 8. Dogfood the IDResolver stats api to identify how big this lettercode is
         stats_request = requests.get(
             f"https://alpha.nationalarchives.gov.uk/idresolver/stats/" f"{lettercode}"
@@ -527,10 +533,10 @@ def process_data(
             stats = stats_request.json()
             total = sum([int(v) for k, v in stats.items()])
             sleep_time = int(total / 100000)
-            print(f"Sleep: {sleep_time}")
+            yield f"Received size from stats service and calculated sleep time between cycles as: {sleep_time}<br>"
         else:
             sleep_time = 15
-        es_logger.info(f"Running ILDB queries for: {lettercode}")
+        yield f"Running ILDB queries for: {lettercode}<br>"
         # 10. Begin iterating each level in the hierarchy
         pieces_canonical = cursor_get(
             database_connection=database_connection, query_string=piece_query(lettercode=lettercode)
@@ -543,6 +549,7 @@ def process_data(
             verbosity=verbosity,
             ingest=ingest,
         )
+        yield "Iterated records for pieces<br>"
         if ingest:
             elastic.indices.put_settings(index=elastic_index, body=es_index_done_settings)
             time.sleep(sleep_time)
@@ -559,6 +566,7 @@ def process_data(
             verbosity=verbosity,
             ingest=ingest,
         )
+        yield "Iterated records for divisions<br>"
         if ingest:
             elastic.indices.put_settings(index=elastic_index, body=es_index_done_settings)
             elastic.indices.put_settings(index=elastic_index, body=es_index_settings)
@@ -574,6 +582,7 @@ def process_data(
             verbosity=verbosity,
             ingest=ingest,
         )
+        yield "Iterated records for subseries<br>"
         if ingest:
             elastic.indices.put_settings(index=elastic_index, body=es_index_done_settings)
             elastic.indices.put_settings(index=elastic_index, body=es_index_settings)
@@ -589,6 +598,7 @@ def process_data(
             verbosity=verbosity,
             ingest=ingest,
         )
+        yield "Iterated records for subsubseries<br>"
         if ingest:
             elastic.indices.put_settings(index=elastic_index, body=es_index_done_settings)
             elastic.indices.put_settings(index=elastic_index, body=es_index_settings)
@@ -603,6 +613,7 @@ def process_data(
             verbosity=verbosity,
             ingest=ingest,
         )
+        yield "Iterated records for items<br>"
         if ingest:
             elastic.indices.put_settings(index=elastic_index, body=es_index_done_settings)
             time.sleep(sleep_time)
@@ -619,6 +630,7 @@ def process_data(
             verbosity=verbosity,
             ingest=ingest,
         )
+        yield "Iterated records for series<br>"
         if ingest:
             elastic.indices.put_settings(index=elastic_index, body=es_index_done_settings)
             time.sleep(sleep_time)
@@ -626,6 +638,7 @@ def process_data(
         lettercodes_canonical = [
             [make_canonical({"letter_code": lettercode, "title": lettercode_title})]
         ]
+        yield "Iterated records for lettercode<br>"
         es_iterator(
             elastic=elastic,
             elastic_index=elastic_index,
@@ -634,7 +647,7 @@ def process_data(
             verbosity=verbosity,
             ingest=ingest,
         )
-        es_logger.info("Done with indexing.")
+        yield "Done with indexing.<br>"
         if ingest:
             elastic.indices.put_settings(index=elastic_index, body=es_index_done_settings)
     if ingest:
