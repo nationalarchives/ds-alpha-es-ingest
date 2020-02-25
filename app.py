@@ -72,17 +72,30 @@ def ingest():
     else:
         ildb_connection = None
     if es_index and es_port and es_host:
-        es = Elasticsearch(
-            hosts=[
-                {
-                    "host": es_host,
-                    "use_ssl": True,
-                    "verify_certs": True,
-                    "port": es_port,
-                    "ca_certs": certifi.where(),
-                }
-            ]
-        )
+        if settings.flask_local:
+            es = Elasticsearch(
+                hosts=[
+                    {
+                        "host": es_host,
+                        "use_ssl": True,
+                        "verify_certs": False,
+                        "port": es_port,
+                        "ca_certs": certifi.where(),
+                    }
+                ]
+            )
+        else:
+            es = Elasticsearch(
+                hosts=[
+                    {
+                        "host": es_host,
+                        "use_ssl": True,
+                        "verify_certs": True,
+                        "port": es_port,
+                        "ca_certs": certifi.where(),
+                    }
+                ]
+            )
     else:
         es = None
     settings_dict["ildb_connection"] = bool(ildb_connection)
@@ -98,7 +111,7 @@ def ingest():
                     end=end,
                     lettercode=lettercode,
                     verbosity=False,
-                    ingest=False,
+                    ingest=action,
                     database_connection=ildb_connection,
                 )
             )

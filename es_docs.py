@@ -541,6 +541,7 @@ def process_data(
         pieces_canonical = cursor_get(
             database_connection=database_connection, query_string=piece_query(lettercode=lettercode)
         )
+        yield "Iterating pieces<br>"
         es_iterator(
             elastic=elastic,
             elastic_index=elastic_index,
@@ -558,6 +559,7 @@ def process_data(
             database_connection=database_connection,
             query_string=division_query(lettercode=lettercode),
         )
+        yield "Iterating divisions<br>"
         es_iterator(
             elastic=elastic,
             elastic_index=elastic_index,
@@ -574,6 +576,7 @@ def process_data(
             database_connection=database_connection,
             query_string=subseries_query(lettercode=lettercode),
         )
+        yield "Iterating subseries<br>"
         es_iterator(
             elastic=elastic,
             elastic_index=elastic_index,
@@ -590,6 +593,7 @@ def process_data(
             database_connection=database_connection,
             query_string=subsubseries_query(lettercode=lettercode),
         )
+        yield "Iterating subsubseries<br>"
         es_iterator(
             elastic=elastic,
             elastic_index=elastic_index,
@@ -605,6 +609,7 @@ def process_data(
         items_canonical = cursor_get(
             database_connection=database_connection, query_string=item_query(lettercode=lettercode)
         )
+        yield "Iterating items<br>"
         es_iterator(
             elastic=elastic,
             elastic_index=elastic_index,
@@ -622,6 +627,7 @@ def process_data(
             database_connection=database_connection,
             query_string=series_query(lettercode=lettercode),
         )
+        yield "Iterating series<br>"
         es_iterator(
             elastic=elastic,
             elastic_index=elastic_index,
@@ -638,7 +644,7 @@ def process_data(
         lettercodes_canonical = [
             [make_canonical({"letter_code": lettercode, "title": lettercode_title})]
         ]
-        yield "Iterated records for lettercode<br>"
+        yield "Iterating records for lettercode<br>"
         es_iterator(
             elastic=elastic,
             elastic_index=elastic_index,
