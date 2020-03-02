@@ -1,4 +1,6 @@
 FROM python:3.8-alpine
+#FROM jamiehewland/alpine-pypy:latest
+
 
 RUN apk add python3-dev build-base linux-headers pcre-dev uwsgi-python unixodbc unixodbc-dev freetds freetds-dev ca-certificates
 
@@ -30,5 +32,5 @@ RUN ls /opt/ingest
 RUN printenv
 
 #CMD gunicorn --log-level debug -k gevent -t 1000 --graceful-timeout 1000 --keep-alive 300 --threads 20 -w 4 -b 0.0.0.0:8000 app:app
-# CMD waitress-serve --port=8000 --channel-timeout=6000 app:app
-CMD python app.py
+CMD waitress-serve --port=8000 --channel-timeout=6000 app:app
+#CMD pypy3 app.py
