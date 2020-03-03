@@ -24,6 +24,7 @@ If you want to push data (rather than just testing the basic connections) add th
 
 
 
+'Driver=FreeTDS;Server=host.docker.internal;Database=ILDB;UID=digirati;PWD=jaffaCAKES9;'
 
 
 

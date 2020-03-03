@@ -1,0 +1,306 @@
+{
+  "AccDates": {
+    "label": "Accumulation Dates",
+    "nested": null
+  },
+  "Accrls": {
+    "label": "Accruals",
+    "nested": null
+  },
+  "AcsConds": {
+    "label": "Access Conditions",
+    "nested": null
+  },
+  "AdmBgr": {
+    "label": "Administrative Background",
+    "nested": null
+  },
+  "ApprInfo": {
+    "label": "Appraisal Information",
+    "nested": null
+  },
+  "Arrmnt": {
+    "label": "Arrangement",
+    "nested": null
+  },
+  "BRefIAID": {
+    "label": "Browse Parent IAID",
+    "nested": null
+  },
+  "BatchId": {
+    "label": "BatchId",
+    "nested": null
+  },
+  "CFrmDt": {
+    "label": "Covering From Date",
+    "nested": null
+  },
+  "CToDt": {
+    "label": "Covering To Date",
+    "nested": null
+  },
+  "CatId": {
+    "label": "Catalogue Id",
+    "nested": null
+  },
+  "Clsr": {
+    "label": "Closure",
+    "nested": {
+      "CC": "Closure Code",
+      "CS": "Closure Status",
+      "CT": "Closure Type",
+      "RecOpenD": "Record Opening Date"
+    }
+  },
+  "CorpNs": {
+    "label": "Corporate Bodies",
+    "nested": {
+      "XRefD": "Corporate Body Description",
+      "XRefN": "Corporate Body Name"
+    }
+  },
+  "CovDts": {
+    "label": "Covering Dates",
+    "nested": null
+  },
+  "CpsInfo": {
+    "label": "Copies Information",
+    "nested": null
+  },
+  "CrtrNames": {
+    "label": "Creators",
+    "nested": {
+      "Edate": "Creator End Date",
+      "EDate": "Creator End Date",
+      "FN": "Forename",
+      "PTtl": "Personal Title",
+      "PreTtl": "Personal Foretitle",
+      "SDate": "Creator Start Date",
+      "SN": "Surname",
+      "XRefN": "Corporate Body Name"
+    }
+  },
+  "CustHist": {
+    "label": "Custodial History",
+    "nested": null
+  },
+  "Dgtsd": {
+    "label": "Digitised",
+    "nested": null
+  },
+  "Dim": {
+    "label": "Dimensions",
+    "nested": null
+  },
+  "FRefDep": {
+    "label": "Former Reference (Dept)",
+    "nested": null
+  },
+  "FRefPro": {
+    "label": "Former Reference (PRO)",
+    "nested": null
+  },
+  "HeldBys": {
+    "label": "Held By",
+    "nested": {
+      "XRefC": "Archon no.",
+      "XRefId": "Archon IAID",
+      "XRefN": "Corporate Body Name",
+      "XRefT": "Archon type",
+      "XRefURL": "Archon URL"
+    }
+  },
+  "IAID": {
+    "label": "IAID",
+    "nested": null
+  },
+  "ImmSrcOfAcs": {
+    "label": "Immediate Source of Acquisition",
+    "nested": {
+      "Desc": "Description",
+      "EDate": "Death/End Date",
+      "FN": "Forename",
+      "PTtl": "Personal Title",
+      "PreTtl": "Personal Foretitle",
+      "SDate": "Birth/Start Date",
+      "SN": "Surname",
+      "XRefD": "Description",
+      "XRefN": "Name"
+    }
+  },
+  "Lang": {
+    "label": "Language",
+    "nested": null
+  },
+  "LglStts": {
+    "label": "Legal Status",
+    "nested": null
+  },
+  "Links": {
+    "label": "Links",
+    "nested": null
+  },
+  "LocOfOrigs": {
+    "label": "Location of Originals",
+    "nested": {
+      "Desc": "Description",
+      "XRefD": "Description",
+      "XRefN": "Corporate Body Name"
+    }
+  },
+  "LvlId": {
+    "label": "Catalogue Level Id",
+    "nested": null
+  },
+  "MapDes": {
+    "label": "Map Designation",
+    "nested": null
+  },
+  "MapScNum": {
+    "label": "Map Scale Number",
+    "nested": null
+  },
+  "Note": {
+    "label": "Note",
+    "nested": null
+  },
+  "PIAID": {
+    "label": "Parent IAID",
+    "nested": null
+  },
+  "People": {
+    "label": "Personal Names",
+    "nested": {
+      "DoB": "Birth Date",
+      "DoD": "Death Date",
+      "FN": "Forename",
+      "PTtl": "Title",
+      "PreTtl": "Foretitle",
+      "SN": "Surname"
+    }
+  },
+  "PhysCond": {
+    "label": "Physical Condition",
+    "nested": null
+  },
+  "PhysDescExtnt": {
+    "label": "Physical Description (Extent)",
+    "nested": null
+  },
+  "PhysDescFrm": {
+    "label": "Physical Description (Form)",
+    "nested": null
+  },
+  "Places": {
+    "label": "Places",
+    "nested": {
+      "Cnty": "County",
+      "Ctry": "Country",
+      "CtryID": "Country Id",
+      "Desc": "Description (Archon)",
+      "DispName": "Display Name",
+      "LocType": "Location Type",
+      "NewCnty": "New County",
+      "NewCntyID": "New County Id",
+      "OldCnty": "Old County",
+      "OldCntyID": "Old County Id",
+      "Par": "Parish",
+      "PlN": "Place Name",
+      "Reg": "Region",
+      "RegID": "Region Id",
+      "Twn": "Town",
+      "TwnID": "Town Id"
+    }
+  },
+  "Pref": {
+    "label": "Part reference",
+    "nested": null
+  },
+  "PublNotes": {
+    "label": "Publication Note",
+    "nested": null
+  },
+  "RRec": {
+    "label": "Record",
+    "nested": {
+      "CURL": "External resource URL",
+      "ISADGRef": "ISAD(G) reference",
+      "NRAD": "NRA Reference",
+      "NRAID": "NRA catalogue reference (2nd part)",
+      "ROColRef": "Record Office collection reference",
+      "RRTtl": "Record title",
+      "SrtW": "NRA catalogue reference (3rd part)"
+    }
+  },
+  "Ref": {
+    "label": "Reference",
+    "nested": null
+  },
+  "RelMats": {
+    "label": "Related Material",
+    "nested": {
+      "Desc": "Description",
+      "XRefId": "Linked Catalogue IAID"
+    }
+  },
+  "RstrOnUse": {
+    "label": "Restrictions on Use",
+    "nested": null
+  },
+  "SC": {
+    "label": "Scope and Content",
+    "nested": {
+      "Desc": "Description",
+      "Eph": "Ephemera",
+      "Orgs": {
+        "label": "Corporate Bodies",
+        "nested": {
+          "XRefN": "Corporate Body Name"
+        }
+      },
+      "Plcs": {
+        "label": "Places",
+        "nested": {
+          "XRefN": "Place Name"
+        }
+      },
+      "Pple": {
+        "label": "Personal Names",
+        "nested": {
+          "FN": "Forename",
+          "SN": "Surname",
+          "Sdate": "Birth Date",
+          "EDate": "Death Date"
+        }
+      },
+      "Schema": "Schema"
+    }
+  },
+  "SepMats": {
+    "label": "Separated Material",
+    "nested": {
+      "Desc": "Description",
+      "XRefId": "Linked Catalogue IAID"
+    }
+  },
+  "Src": {
+    "label": "Data Source",
+    "nested": null
+  },
+  "SrtKey": {
+    "label": "Sort Key",
+    "nested": null
+  },
+  "Subjects": {
+    "label": "Authority Terms",
+    "nested": null
+  },
+  "Ttl": {
+    "label": "Title",
+    "nested": null
+  },
+  "UnpFindAids": {
+    "label": "Unpublished Finding Aids",
+    "nested": null
+  }
+}

@@ -5,6 +5,7 @@ import pyodbc
 import json
 from copy import deepcopy
 import requests
+from mongo_grabber import get_mongo
 from ildb_queries import (
     piece_query,
     series_query,
@@ -25,6 +26,7 @@ from settings import (
     es_resolver_index,
     es_port,
     es_host,
+    es_update
 )
 import logging
 import certifi
@@ -35,7 +37,7 @@ import gzip
 
 
 es_logger = logging.getLogger("")
-es_logger.setLevel(logging.DEBUG)
+es_logger.setLevel(logging.INFO)
 
 # Create globals
 # Default to getting these from the staticdata service, but if not, make/load them locally.
@@ -295,15 +297,26 @@ def ingest_list(item_list: List, index: str = "test-index") -> Dict:
     :return: dict
     """
     for doc in item_list:
-        yield {
-            "_op_type": "update",
-            "_index": index,
-            # "_type": "resolver",
-            "_id": doc["id"],
-            "doc": doc,
-            "doc_as_upsert": True,
-            "retry_on_conflict": 5,
-        }
+        if es_update:
+            yield {
+                "_op_type": "update",
+                "_index": index,
+                # "_type": "resolver",
+                "_id": doc["id"],
+                "doc": doc,
+                "doc_as_upsert": True,
+                "retry_on_conflict": 5,
+            }
+        else:
+            yield {
+                "_op_type": "index",
+                "_index": index,
+                # "_type": "resolver",
+                "_id": doc["id"],
+                "doc": doc,
+                # "doc_as_upsert": True,
+                "retry_on_conflict": 5,
+            }
 
 
 def p_bulk(es_, index_: str, iterator, chunk: int = 200, verbose: bool = True):
@@ -410,9 +423,11 @@ def cursor_get(database_connection, query_string, chunk_size=1000):
             rows = [
                 make_canonical(dict(zip(columns, r))) for r in row
             ]  # Make a dict and then parse the dict for reuse
+            rows_ = get_mongo(obj_list=rows)
+            # print(json.dumps(rows_, indent=2))
             if not row:
                 break
-            yield rows
+            yield rows_
         crsr.close()
     return True
 
@@ -464,6 +479,7 @@ def process_data(
     :param ingest: boolean, if True, push into ES
     :return:
     """
+    yield f"ES Update is set to {es_update}<br>"
     with open("config/update_mappings.json", "r") as mappings_file:
         es_index_settings = json.load(mappings_file)
     with open("config/create_index.json", "r") as create_file:
