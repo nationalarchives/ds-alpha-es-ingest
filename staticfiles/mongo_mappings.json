@@ -45,10 +45,12 @@
   },
   "Clsr": {
     "label": "Closure",
-    "nested": {"CC":  "Closure Code",
-              "CS": "Closure Status",
-              "CT": "Closure Type",
-              "RecOpenD": "Record Opening Date"}
+    "nested": {
+      "CC": "Closure Code",
+      "CS": "Closure Status",
+      "CT": "Closure Type",
+      "RecOpenD": "Record Opening Date"
+    }
   },
   "CorpNs": {
     "label": "Corporate Bodies",
@@ -69,6 +71,7 @@
     "label": "Creators",
     "nested": {
       "Edate": "Creator End Date",
+      "EDate": "Creator End Date",
       "FN": "Forename",
       "PTtl": "Personal Title",
       "PreTtl": "Personal Foretitle",
@@ -249,24 +252,26 @@
     "nested": {
       "Desc": "Description",
       "Eph": "Ephemera",
-      "Orgs": {"label": "Corporate Bodies",
-              "nested": {
-                      "XRefN": "Corporate Body Name"
-              }
+      "Orgs": {
+        "label": "Corporate Bodies",
+        "nested": {
+          "XRefN": "Corporate Body Name"
+        }
       },
       "Plcs": {
         "label": "Places",
         "nested": {
           "XRefN": "Place Name"
         }
-      }
-      "Pple": {"label": "Personal Names",
-               "nested": {
-                     "FN": "Forename",
-                       "SN": "Surname",
-                       "Sdate": "Birth Date",
-                       "EDate": "Death Date"
-               }
+      },
+      "Pple": {
+        "label": "Personal Names",
+        "nested": {
+          "FN": "Forename",
+          "SN": "Surname",
+          "Sdate": "Birth Date",
+          "EDate": "Death Date"
+        }
       },
       "Schema": "Schema"
     }
