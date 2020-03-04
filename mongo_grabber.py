@@ -2,6 +2,11 @@ import requests
 import json
 from slugify import slugify
 from copy import deepcopy
+import logging
+
+
+logger = logging.getLogger('waitress')
+logger.setLevel(logging.DEBUG)
 
 
 with open("staticfiles/mongo_mappings.json") as f:
@@ -64,7 +69,17 @@ def mongo_recurse(mongo_dict, mappings):
             if isinstance(v, dict):
                 new_dict[new_key] = mongo_recurse(v, mappings[k]["nested"])
             elif isinstance(v, list):
-                new_dict[new_key] = [mongo_recurse(x, mappings[k]["nested"]) for x in v]
+                try:
+                    if all([isinstance(val, str) for val in v]):  # hack catch for when the val is just a list of strsx
+                        new_dict[new_key] = v
+                    else:
+                        new_dict[new_key] = [mongo_recurse(x, mappings[k]["nested"]) for x in v]
+                except TypeError:
+                    logging.error(f"Existing key: {k}")
+                    logging.error(f"Key: {new_key}")
+                    logging.error(f"Value list: {v}")
+                    logging.error(f"Mappings: {mappings[k]}")
+                    logging.error(f"Mongo dict: {mongo_dict}")
             else:
                 new_dict[new_key] = v
     elif isinstance(mongo_dict, list):
