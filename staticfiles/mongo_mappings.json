@@ -79,9 +79,13 @@
       "SN": "Surname",
       "XRefN": "Corporate Body Name"
     }
-  },
+  },ß
   "CustHist": {
     "label": "Custodial History",
+    "nested": null
+  },
+  "Desc": {
+    "label": "Description",
     "nested": null
   },
   "Dgtsd": {

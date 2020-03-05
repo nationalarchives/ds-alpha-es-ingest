@@ -72,7 +72,12 @@ def mongo_recurse(mongo_dict, mappings):
             else:
                 logging.error("This is a no mappings error when trying to identify the mapped key"
                               " for a dict key/value pairß.")
-                new_key = slugify(k).replace("-", "_")
+                try:
+                    logging.error("I am trying to get the key from master map")
+                    new_key = slugify(mongo_map[k]["label"]).replace("-", "_")
+                except:
+                    logging.error("I FAILED to get key from master map")
+                    new_key = slugify(k).replace("-", "_")
                 logging.error(f"Existing key: {k}")
                 logging.error(f"Key: {new_key}")
                 logging.error(f"Value list: {v}")
