@@ -5,7 +5,7 @@ from copy import deepcopy
 import logging
 
 
-logger = logging.getLogger('waitress')
+logger = logging.getLogger("waitress")
 logger.setLevel(logging.DEBUG)
 
 
@@ -34,11 +34,13 @@ def get_mongo(obj_list):
     # if we have data, filter it to just things that have data and which match an id in the list from ILDB
     if mongo:
         mongo_filtered = [
-            list(filter(lambda mongo_o: mongo_o["id"] == o["id"], mongo))[0] for o in obj_list
+            list(filter(lambda mongo_o: mongo_o["id"] == o["id"], mongo))[0]
+            for o in obj_list
         ]
     else:
         mongo_filtered = None
-    # Map the mongo data to have the right field names rather than the abbreviated/cryptic form used in Mongo
+    # Map the mongo data to have the right field names rather than the abbreviated/cryptic form
+    # used in Mongo
     if mongo_filtered:
         mongo_ = map_mongo(mong_data=mongo_filtered)
     else:
@@ -59,21 +61,31 @@ def mongo_recurse(mongo_dict, mappings):
     new_dict = {}
     if isinstance(mongo_dict, dict):
         for k, v in mongo_dict.items():
-            if mappings.get(k):
-                try:
-                    new_key = slugify(mappings[k]["label"]).replace("-", "_")
-                except TypeError:
-                    new_key = slugify(mappings[k]).replace("-", "_")
+            if mappings:
+                if mappings.get(k):
+                    try:
+                        new_key = slugify(mappings[k]["label"]).replace("-", "_")
+                    except TypeError:
+                        new_key = slugify(mappings[k]).replace("-", "_")
+                else:
+                    new_key = slugify(k).replace("-", "_")
             else:
                 new_key = slugify(k).replace("-", "_")
+                logging.error(f"Existing key: {k}")
+                logging.error(f"Key: {new_key}")
+                logging.error(f"Value list: {v}")
+                logging.error(f"Mongo dict: {mongo_dict}")
             if isinstance(v, dict):
                 new_dict[new_key] = mongo_recurse(v, mappings[k]["nested"])
             elif isinstance(v, list):
                 try:
-                    if all([isinstance(val, str) for val in v]):  # hack catch for when the val is just a list of strsx
+                    # hack catch for when the val is just a list of values
+                    if all([isinstance(val, (str, int)) for val in v]):
                         new_dict[new_key] = v
                     else:
-                        new_dict[new_key] = [mongo_recurse(x, mappings[k]["nested"]) for x in v]
+                        new_dict[new_key] = [
+                            mongo_recurse(x, mappings[k]["nested"]) for x in v
+                        ]
                 except TypeError:
                     logging.error(f"Existing key: {k}")
                     logging.error(f"Key: {new_key}")
@@ -98,14 +110,18 @@ def map_mongo_test():
     else:
         mong_data = None
     if mong_data:
-        return {x["id"]: mongo_recurse(x["iadata"], mappings=mongo_map) for x in mong_data}
+        return {
+            x["id"]: mongo_recurse(x["iadata"], mappings=mongo_map) for x in mong_data
+        }
     else:
         return []
 
 
 def map_mongo(mong_data=None):
     if mong_data:
-        return {x["id"]: mongo_recurse(x["iadata"], mappings=mongo_map) for x in mong_data}
+        return {
+            x["id"]: mongo_recurse(x["iadata"], mappings=mongo_map) for x in mong_data
+        }
     else:
         print("No data received from Mongo")
         return []
