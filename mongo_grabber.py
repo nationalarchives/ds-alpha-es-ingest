@@ -70,6 +70,8 @@ def mongo_recurse(mongo_dict, mappings):
                 else:
                     new_key = slugify(k).replace("-", "_")
             else:
+                logging.error("This is a no mappings error when trying to identify the mapped key"
+                              " for a dict key/value pairß.")
                 new_key = slugify(k).replace("-", "_")
                 logging.error(f"Existing key: {k}")
                 logging.error(f"Key: {new_key}")
@@ -87,6 +89,7 @@ def mongo_recurse(mongo_dict, mappings):
                             mongo_recurse(x, mappings[k]["nested"]) for x in v
                         ]
                 except TypeError:
+                    logging.error("This is a type error when parsing a list of values.")
                     logging.error(f"Existing key: {k}")
                     logging.error(f"Key: {new_key}")
                     logging.error(f"Value list: {v}")
