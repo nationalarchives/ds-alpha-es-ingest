@@ -530,6 +530,7 @@ def process_data(
         else:  # Just ingest everything
             working_lettercodes = lettercodes_tuples
     yield f"Working lettercodes: {working_lettercodes}<br>"
+    es_logger.info(f"Working lettercodes: {working_lettercodes}<br>")
     # 6. Iterate the set of lettercodes to be ingested
     for lettercode, lettercode_title in working_lettercodes:
         yield f"Working on {lettercode}: {lettercode_title}, ingest: {ingest}<br>"
@@ -538,8 +539,10 @@ def process_data(
         shard = "".join([x for x in lettercode[0:2] if x.isalpha()]).lower()
         with gzip.open(f"taxonomy_datafiles/taxonomy_{shard}.json.gz", "rb") as taxonomy_file:
             yield "Loading taxonomy data from disk<br>"
+            es_logger.info("Loading taxonomy data from disk")
             taxonomy_data = json.loads(taxonomy_file.read())
             yield "Loaded taxonomy data from disk<br>"
+            es_logger.info("Loaded taxonomy data from disk")
         # 8. Dogfood the IDResolver stats api to identify how big this lettercode is
         stats_request = requests.get(
             f"https://alpha.nationalarchives.gov.uk/idresolver/stats/" f"{lettercode}"
@@ -550,9 +553,12 @@ def process_data(
             total = sum([int(v) for k, v in stats.items()])
             sleep_time = int(total / 100000)
             yield f"Received size from stats service and calculated sleep time between cycles as: {sleep_time}<br>"
+            es_logger.info(f"Received size from stats service and calculated sleep time between cycles as: {sleep_time}<br>")
+
         else:
             sleep_time = 15
         yield f"Running ILDB queries for: {lettercode}<br>"
+        es_logger.info(f"Running ILDB queries for: {lettercode}<br>")
         # 10. Begin iterating each level in the hierarchy
         pieces_canonical = cursor_get(
             database_connection=database_connection, query_string=piece_query(lettercode=lettercode)
