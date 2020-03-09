@@ -84,6 +84,10 @@
     "label": "Custodial History",
     "nested": null
   },
+  "Desc": {
+    "label": "Description",
+    "nested": null
+  },
   "Dgtsd": {
     "label": "Digitised",
     "nested": null
