@@ -540,10 +540,7 @@ def process_data(
         with gzip.open(f"taxonomy_datafiles/taxonomy_{shard}.json.gz", "rb") as taxonomy_file:
             yield "Loading taxonomy data from disk<br>"
             es_logger.info("Loading taxonomy data from disk")
-            try:
-                taxonomy_data = json.loads(taxonomy_file.read())
-            except:
-                raise
+            taxonomy_data = json.loads(taxonomy_file.read())
             yield "Loaded taxonomy data from disk<br>"
             es_logger.info("Loaded taxonomy data from disk")
         # 8. Dogfood the IDResolver stats api to identify how big this lettercode is
