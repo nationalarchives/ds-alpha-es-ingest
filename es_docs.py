@@ -16,6 +16,7 @@ from ildb_queries import (
     division_query,
 )
 from date_handling import gen_date, identify_eras, parse_eras
+from nlp import string_to_entities
 from highlight_data import get_highlights
 from guides import load_guide_data, identify_guides
 from settings import (
@@ -34,6 +35,10 @@ from collections import OrderedDict
 from typing import Dict, Optional, Union, List, Tuple
 import time
 import gzip
+import spacy
+
+
+nlp = spacy.load("en_core_web_sm")
 
 
 es_logger = logging.getLogger("")
