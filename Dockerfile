@@ -1,7 +1,18 @@
-FROM python:3.8-alpine
+FROM python:3.8-slim
 
-
-RUN apk add python3-dev build-base linux-headers pcre-dev uwsgi-python unixodbc unixodbc-dev freetds freetds-dev ca-certificates
+RUN apt-get update && apt-get install -y python3-dev \
+python3-numpy \
+ python3-pandas \
+  uwsgi-plugin-python3 \
+  build-essential \
+  chrpath \
+  libssl-dev \
+  libxft-dev \
+  libfreetype6 \
+  libfreetype6-dev \
+  libfontconfig1 \
+  libfontconfig1-dev \
+  openssl
 
 ENV ildb_user=foo
 ENV ildb_password=bar
