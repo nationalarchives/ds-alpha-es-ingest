@@ -14,6 +14,9 @@ python3-numpy \
   libfontconfig1-dev \
   python-pyodbc \
   unixodbc-dev \
+  freetds-dev \
+  freetds-bin \
+   tdsodbc \
   openssl
 
 ENV ildb_user=foo
