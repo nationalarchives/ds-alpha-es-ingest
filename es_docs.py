@@ -427,7 +427,7 @@ def cursor_get(database_connection, query_string, chunk_size=1000):
             rows = [
                 make_canonical(dict(zip(columns, r))) for r in row
             ]  # Make a dict and then parse the dict for reuse
-            rows_ = get_mongo(obj_list=rows, nlp=nlp)
+            rows_ = get_mongo(obj_list=rows, spacy_nlp=nlp)
             # print(json.dumps(rows_, indent=2))
             if not row:
                 break
