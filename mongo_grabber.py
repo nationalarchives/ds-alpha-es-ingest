@@ -3,6 +3,7 @@ import json
 from slugify import slugify
 from copy import deepcopy
 import logging
+from nlp import flatten_to_string, string_to_entities
 
 
 logger = logging.getLogger("waitress")
@@ -13,13 +14,14 @@ with open("staticfiles/mongo_mappings.json") as f:
     mongo_map = json.load(f)
 
 
-def get_mongo(obj_list):
+def get_mongo(obj_list, spacy_nlp=None):
     """
     decorate the object from the initial ILDB harvest and make_canonical process with Mongo data.
 
     If there is an iaid use that for the iaid
 
     :param obj_list:
+    :param spacy_nlp: optional
     :return:
     """
     ids = [{"id": obj["id"], "level": obj["level"]} for obj in obj_list]
@@ -31,7 +33,8 @@ def get_mongo(obj_list):
         mongo = mongo_data.json()
     else:
         mongo = None
-    # if we have data, filter it to just things that have data and which match an id in the list from ILDB
+    # if we have data, filter it to just things that have data and
+    # which match an id in the list from ILDB
     if mongo:
         mongo_filtered = [
             list(filter(lambda mongo_o: mongo_o["id"] == o["id"], mongo))[0]
@@ -52,6 +55,12 @@ def get_mongo(obj_list):
             obj["mongo"] = mongo_.get(obj["id"])
             if obj["mongo"]:
                 obj["iaid"] = obj["mongo"]["iaid"]
+            if spacy_nlp:
+                e = string_to_entities(
+                    input_string=flatten_to_string(obj), nlp=spacy_nlp
+                )
+                if e:
+                    obj.update(e)
         return new_obj_list
     else:
         return obj_list
@@ -70,8 +79,10 @@ def mongo_recurse(mongo_dict, mappings):
                 else:
                     new_key = slugify(k).replace("-", "_")
             else:
-                logging.error("This is a no mappings error when trying to identify the mapped key"
-                              " for a dict key/value pairß.")
+                logging.error(
+                    "This is a no mappings error when trying to identify the mapped key"
+                    " for a dict key/value pairß."
+                )
                 try:
                     logging.error("I am trying to get the key from master map")
                     new_key = slugify(mongo_map[k]["label"]).replace("-", "_")
