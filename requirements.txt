@@ -24,3 +24,4 @@ personalnames
 flashtext
 spacy
 bs4
+dictor
