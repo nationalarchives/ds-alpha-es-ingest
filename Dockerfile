@@ -12,6 +12,7 @@ python3-numpy \
   libfreetype6-dev \
   libfontconfig1 \
   libfontconfig1-dev \
+  python-pyodbc \
   openssl
 
 ENV ildb_user=foo
