@@ -55,12 +55,12 @@ def get_mongo(obj_list, spacy_nlp=None):
             obj["mongo"] = mongo_.get(obj["id"])
             if obj["mongo"]:
                 obj["iaid"] = obj["mongo"]["iaid"]
-            # if spacy_nlp:
-            #     e = string_to_entities(
-            #         input_string=flatten_to_string(obj), nlp=spacy_nlp
-            #     )
-            #     if e:
-            #         obj.update(e)
+            if spacy_nlp:
+                e = string_to_entities(
+                    input_string=flatten_to_string(obj), nlp=spacy_nlp
+                )
+                if e:
+                    obj.update(e)
         return new_obj_list
     else:
         return obj_list
