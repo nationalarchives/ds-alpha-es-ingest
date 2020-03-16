@@ -38,6 +38,9 @@ def flatten_to_string(input_obj):
         "title",
         "description",
         "mongo.former_reference_dept",
+        "mongo.administrative_background",
+        "mongo.arrangement",
+        "mongo.custodial_history"
     ]
     flat = " ".join([x for x in [dictor(input_obj, k) for k in source_keys] if x])
     return flat
