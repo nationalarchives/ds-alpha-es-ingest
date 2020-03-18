@@ -5,6 +5,7 @@ from elasticsearch.exceptions import NotFoundError
 from collections import OrderedDict
 from typing import List, Dict
 from elasticsearch.helpers import parallel_bulk
+import requests
 
 
 def get_matches(es_, es_index, path):
@@ -51,23 +52,27 @@ def get_highlights(catalogue_reference):
     return
 
 
-def identify_highlights():
-    input_file = csv.DictReader(open("staticfiles/curated_items.csv"))
-    for row in input_file:
-        item = {k.lower().strip().replace(" ", "_"): v for k, v in row.items() if v}
-        key = item["catalogue_reference"]
-        simplified_item = {k: v for k, v in item.items() if k not in ["catalogue_reference"]}
-        yield key, simplified_item
+def identify_tops():
+    input_data = None
+    r = requests.get("https://alpha.nationalarchives.gov.uk/staticdata/top100.json")
+    if r.status_code == requests.codes.ok:
+        input_data = r.json()
+    if input_data:
+        for k, v in input_data.items():
+            key = v["cat_ref"]
+            simplified_item = dict(description=v["description"],
+                                   document_format=v.get("document_format"))
+            yield key, simplified_item
 
 
 def ingest_list(item_list: List, index: str = "test-index") -> Dict:
     """
     Generator to yield ES compatible dicts that can be used by the ES bulk APIs.
 
-    ? What should be used as the document ID? In this case, I'm just B64 encoding the last identifier in the matches
-    Which will generally be the Foo:~1:bar form. That's just a place holder. We should probably use whatever
-    the most commonly used identifier in our API calls is going to be.
-
+    ? What should be used as the document ID? In this case, I'm just B64 encoding the last \
+    identifier in the matches Which will generally be the Foo:~1:bar form. That's just a place \
+    holder. We should probably use whatever the most commonly used identifier in our API calls \
+    is going to be.
 
     :param item_list: input list to parse
     :param index: ES index to use
@@ -93,13 +98,12 @@ def fetch_es_record(key, item, es_, index="path-resolver-taxonomy"):
     :param es_:
     :return:
     """
-    import json
     resolver_dict = get_matches(es_=es_, es_index=index, path=key)
     try:
         c = resolver_dict["canonical"][0]
         doc = c
-        doc["highlights"] = [item]
-        doc["highlighted_item"] = True
+        doc["top_items"] = [item]
+        doc["top_item"] = True
         ident_ = doc["id"]
         es_doc = {
             "_op_type": "update",
@@ -111,6 +115,7 @@ def fetch_es_record(key, item, es_, index="path-resolver-taxonomy"):
         }
         return es_doc
     except KeyError:
+        print(f"Key Error: {key}")
         pass
 
 
@@ -158,10 +163,11 @@ if __name__ == "__main__":
         ]
     )
     import json
-
-    highlights = [fetch_es_record(*i, es) for i in identify_highlights()]
+    #
+    highlights = [fetch_es_record(*i, es) for i in identify_tops()]
     chunked_highlights = [n for n in highlights if n]
-    print(json.dumps(chunked_highlights, indent=2))
+    print(len(chunked_highlights))
+    # print(json.dumps(chunked_highlights, indent=2))
     # p_bulk(es_=es, iterator=chunked_highlights, index_="path-resolver-taxonomy", verbose=False)
 
 
