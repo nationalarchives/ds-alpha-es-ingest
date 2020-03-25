@@ -213,24 +213,37 @@ def extract_medal_card_details(mongo_object):
         soup = BeautifulSoup(html_string, "html.parser")
         details = dict(person={}, details=[])
         for person in soup.find_all("persname"):
-            details["person"]["forenames"] = person.find(
-                "emph", {"altrender": "forenames"}
-            ).contents[0]
-            details["person"]["surname"] = person.find("emph", {"altrender": "surname"}).contents[0]
-            details["person"]["combined_name"] = " ".join(
-                [details["person"]["forenames"], details["person"]["surname"]]
-            )
+            try:
+                details["person"]["forenames"] = person.find(
+                    "emph", {"altrender": "forenames"}
+                ).contents[0]
+            except AttributeError:
+                details["person"]["forenames"] = None
+            try:
+                details["person"]["surname"] = person.find("emph", {"altrender": "surname"}).contents[0]
+            except AttributeError:
+                details["person"]["surname"] = None
+            details["person"]["combined_name"] = f'{details["person"]["forenames"]} {details["person"]["surname"]}'
         for detail in soup.find_all("emph", {"altrender": "medal"}):
-            corps = detail.find("corpname").contents[0]
-            regiment_no = detail.find("emph", {"altrender": "regno"}).contents[0]
-            rank = detail.find("emph", {"altrender": "rank"}).contents[0]
+            try:
+                corps = detail.find("corpname").contents[0]
+            except AttributeError:
+                corps = None
+            try:
+                regiment_no = detail.find("emph", {"altrender": "regno"}).contents[0]
+            except AttributeError:
+                regiment_no = None
+            try:
+                rank = detail.find("emph", {"altrender": "rank"}).contents[0]
+            except AttributeError:
+                rank = None
             details["details"].append({"corps": corps, "regiment_no": regiment_no, "rank": rank})
         mongo_object["medal_card"] = details
         return mongo_object
-    except AttributeError:
-        return mongo_object
     except:
         raise
+    # except AttributeError:
+    #     return mongo_object
 
 
 if __name__ == "__main__":
@@ -256,6 +269,7 @@ if __name__ == "__main__":
         verbosity=False,
         ingest=True,
     )
+
     # for foo in medal_cards(spacy_nlp=nlp, piece=17):
     #     for x in ingest_list(foo):
     #         print(x)

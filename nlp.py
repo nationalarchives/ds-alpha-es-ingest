@@ -146,7 +146,7 @@ def string_to_entities(
                     if ent.text not in matches:
                         ents.append({"text": ent.text, "label": ent.label_})
         if medal_card:
-            master_list = ents + date_ents
+            master_list = date_ents
         else:
             master_list = ents + name_ents + date_ents
         return {
