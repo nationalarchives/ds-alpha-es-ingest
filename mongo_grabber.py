@@ -5,7 +5,9 @@ from copy import deepcopy
 import logging
 from nlp import flatten_to_string, string_to_entities
 from iteration_utilities import grouper
-from es_docs_mongo import make_canonical
+from es_docs_mongo import make_canonical, es_iterator
+from bs4 import BeautifulSoup
+from elasticsearch import Elasticsearch
 
 
 logger = logging.getLogger("waitress")
@@ -163,7 +165,6 @@ def reverse_mong(letter_code, division, series, piece, level="Item", max_id_rang
             "item_ref": str(i),
             "catalogue_ref": f"{letter_code} {series}/{piece}/{i}",
             "piece_ref": str(piece),
-
         }
         for i in range(1, max_id_range)
     ]
@@ -181,24 +182,80 @@ def iterate_reverse_mong(rev, nlp_proc=None):
     :return:
     """
     for item_list in rev:
-        mongos = [m for m in get_mongo(obj_list=item_list, spacy_nlp=nlp_proc) if m.get("mongo")]
+        mongos = [
+            extract_medal_card_details(m)
+            for m in get_mongo(obj_list=item_list, spacy_nlp=nlp_proc)
+            if m.get("mongo")
+        ]
         if mongos:
             yield mongos
         else:
             break
 
 
+def medal_cards(spacy_nlp, piece):
+    for x in iterate_reverse_mong(
+        reverse_mong(letter_code="WO", division=16, series=372, piece=piece, level="Item"),
+        nlp_proc=spacy_nlp,
+    ):
+        yield [make_canonical(c) for c in x]
+
+
+def extract_medal_card_details(mongo_object):
+    """
+
+    :param mongo_object:
+    :return:
+    """
+    html_string = mongo_object["mongo"]["scope_and_content"]["description"]
+    try:
+        soup = BeautifulSoup(html_string, "html.parser")
+        details = dict(person={}, details=[])
+        for person in soup.find_all("persname"):
+            details["person"]["forenames"] = person.find(
+                "emph", {"altrender": "forenames"}
+            ).contents[0]
+            details["person"]["surname"] = person.find("emph", {"altrender": "surname"}).contents[0]
+            details["person"]["combined_name"] = " ".join(
+                [details["person"]["forenames"], details["person"]["surname"]]
+            )
+        for detail in soup.find_all("emph", {"altrender": "medal"}):
+            corps = detail.find("corpname").contents[0]
+            regiment_no = detail.find("emph", {"altrender": "regno"}).contents[0]
+            rank = detail.find("emph", {"altrender": "rank"}).contents[0]
+            details["details"].append({"corps": corps, "regiment_no": regiment_no, "rank": rank})
+        mongo_object["medal_card"] = details
+        return mongo_object
+    except AttributeError:
+        return mongo_object
+    except:
+        raise
+
+
 if __name__ == "__main__":
     import spacy
 
     nlp = spacy.load("en_core_web_sm")
-    count = 0
-    for x in iterate_reverse_mong(reverse_mong(
-        letter_code="WO",
-        division=16,
-        series=372,
-        piece=1,
-        level="Item"
-    ), nlp_proc=None):
-        print(x[0])
-        print(make_canonical(x[0]))
+    es = Elasticsearch(
+        hosts=[
+            {
+                "host": "vpc-dev-elasticsearch-6njgchnnn3kml3qbyhrp52g37m.eu-west-2.es.amazonaws.com",
+                "use_ssl": True,
+                "verify_certs": False,
+                "port": 9201,
+                # "ca_certs": certifi.where(),
+            }
+        ]
+    )
+    es_iterator(
+        elastic=es,
+        elastic_index="test-index",
+        level=6,
+        cursor_output=medal_cards(spacy_nlp=nlp, piece=17),
+        verbosity=False,
+        ingest=True,
+    )
+    # for foo in medal_cards(spacy_nlp=nlp, piece=17):
+    #     for x in ingest_list(foo):
+    #         print(x)
+

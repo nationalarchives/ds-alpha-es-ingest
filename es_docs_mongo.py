@@ -285,8 +285,36 @@ def make_canonical(row_dict: Dict) -> Dict:
     if row_dict.get("catalogue_ref"):
         t = taxonomy_data.get(row_dict["catalogue_ref"])
         if t:
-            row_dict["iaid"] = t.get("iaid")
             row_dict["subjects"] = t.get("taxonomy_ids")
+        if row_dict.get("subjects"):
+            row_dict["subjects"] += [
+                {
+                    "code": "C10092",
+                    "subject_name": "Army",
+                    "subject": "army"
+                },
+                {
+                    "code": "C10060",
+                    "subject_name": "Medals",
+                    "subject": "medals"
+                }
+
+            ]
+        else:
+            row_dict["subjects"] = [
+                {
+                    "code": "C10092",
+                    "subject_name": "Army",
+                    "subject": "army"
+                },
+                {
+                    "code": "C10060",
+                    "subject_name": "Medals",
+                    "subject": "medals"
+                }
+
+            ]
+
     return row_dict
 
 
