@@ -18,7 +18,7 @@ with open("staticfiles/mongo_mappings.json") as f:
     mongo_map = json.load(f)
 
 
-def get_mongo(obj_list, spacy_nlp=None):
+def get_mongo(obj_list, spacy_nlp=None, medal_card=False):
     """
     decorate the object from the initial ILDB harvest and make_canonical process with Mongo data.
 
@@ -26,6 +26,7 @@ def get_mongo(obj_list, spacy_nlp=None):
 
     :param obj_list:
     :param spacy_nlp: optional
+    :param medal_card: don't create person entities for medal cards.
     :return:
     """
     ids = [{"id": obj["id"], "level": obj["level"]} for obj in obj_list]
@@ -59,7 +60,7 @@ def get_mongo(obj_list, spacy_nlp=None):
             if obj["mongo"]:
                 obj["iaid"] = obj["mongo"]["iaid"]
             if spacy_nlp:
-                e = string_to_entities(input_string=flatten_to_string(obj), nlp=spacy_nlp)
+                e = string_to_entities(input_string=flatten_to_string(obj), nlp=spacy_nlp, medal_card=medal_card)
                 if e:
                     obj.update(e)
         return new_obj_list
@@ -184,7 +185,7 @@ def iterate_reverse_mong(rev, nlp_proc=None):
     for item_list in rev:
         mongos = [
             extract_medal_card_details(m)
-            for m in get_mongo(obj_list=item_list, spacy_nlp=nlp_proc)
+            for m in get_mongo(obj_list=item_list, spacy_nlp=nlp_proc, medal_card=True)
             if m.get("mongo")
         ]
         if mongos:

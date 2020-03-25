@@ -59,13 +59,15 @@ def entity_list_to_dict(entity_list):
 
 
 def string_to_entities(
-    input_string: str, nlp, ent_types=("DATE", "GPE", "ORG", "FAC", "LOC", "PERSON")
+    input_string: str, nlp, ent_types=("DATE", "GPE", "ORG", "FAC", "LOC", "PERSON"),
+        medal_card=False
 ):
     """
 
     :param input_string:
     :param nlp: spacy model
     :param ent_types: filter to just these entity types
+    :param medal_card: if True, ignore persons.
     :return:
     """
     soup = BeautifulSoup(input_string, features="html.parser")
@@ -143,7 +145,10 @@ def string_to_entities(
                     matches = [e["text"] for e in ents + date_ents + name_ents]
                     if ent.text not in matches:
                         ents.append({"text": ent.text, "label": ent.label_})
-        master_list = ents + name_ents + date_ents
+        if medal_card:
+            master_list = ents + date_ents
+        else:
+            master_list = ents + name_ents + date_ents
         return {
             "entity_list": master_list,
             "entities_by_type": entity_list_to_dict(master_list),
