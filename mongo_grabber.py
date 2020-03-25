@@ -250,6 +250,9 @@ if __name__ == "__main__":
     import spacy
 
     nlp = spacy.load("en_core_web_sm")
+    es_index_done_settings = {"settings": {"index": {"refresh_interval": "10s"}}}
+    es_index_settings = {"settings": {"index": {"refresh_interval": "-1"}}}
+
     es = Elasticsearch(
         hosts=[
             {
@@ -261,6 +264,7 @@ if __name__ == "__main__":
             }
         ]
     )
+    es.indices.put_settings(index="test-index", body=es_index_settings)
     es_iterator(
         elastic=es,
         elastic_index="test-index",
@@ -269,6 +273,8 @@ if __name__ == "__main__":
         verbosity=False,
         ingest=True,
     )
+    es.indices.put_settings(index="test-index", body=es_index_done_settings)
+
 
     # for foo in medal_cards(spacy_nlp=nlp, piece=17):
     #     for x in ingest_list(foo):
