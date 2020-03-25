@@ -1,3 +1,4 @@
+slugify
 certifi
 chardet
 Click

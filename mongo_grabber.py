@@ -4,6 +4,8 @@ from slugify import slugify
 from copy import deepcopy
 import logging
 from nlp import flatten_to_string, string_to_entities
+from iteration_utilities import grouper
+from es_docs_mongo import make_canonical
 
 
 logger = logging.getLogger("waitress")
@@ -37,8 +39,7 @@ def get_mongo(obj_list, spacy_nlp=None):
     # which match an id in the list from ILDB
     if mongo:
         mongo_filtered = [
-            list(filter(lambda mongo_o: mongo_o["id"] == o["id"], mongo))[0]
-            for o in obj_list
+            list(filter(lambda mongo_o: mongo_o["id"] == o["id"], mongo))[0] for o in obj_list
         ]
     else:
         mongo_filtered = None
@@ -56,9 +57,7 @@ def get_mongo(obj_list, spacy_nlp=None):
             if obj["mongo"]:
                 obj["iaid"] = obj["mongo"]["iaid"]
             if spacy_nlp:
-                e = string_to_entities(
-                    input_string=flatten_to_string(obj), nlp=spacy_nlp
-                )
+                e = string_to_entities(input_string=flatten_to_string(obj), nlp=spacy_nlp)
                 if e:
                     obj.update(e)
         return new_obj_list
@@ -101,9 +100,7 @@ def mongo_recurse(mongo_dict, mappings):
                     if all([isinstance(val, (str, int)) for val in v]):
                         new_dict[new_key] = v
                     else:
-                        new_dict[new_key] = [
-                            mongo_recurse(x, mappings[k]["nested"]) for x in v
-                        ]
+                        new_dict[new_key] = [mongo_recurse(x, mappings[k]["nested"]) for x in v]
                 except TypeError:
                     logging.error("This is a type error when parsing a list of values.")
                     logging.error(f"Existing key: {k}")
@@ -129,18 +126,79 @@ def map_mongo_test():
     else:
         mong_data = None
     if mong_data:
-        return {
-            x["id"]: mongo_recurse(x["iadata"], mappings=mongo_map) for x in mong_data
-        }
+        return {x["id"]: mongo_recurse(x["iadata"], mappings=mongo_map) for x in mong_data}
     else:
         return []
 
 
 def map_mongo(mong_data=None):
     if mong_data:
-        return {
-            x["id"]: mongo_recurse(x["iadata"], mappings=mongo_map) for x in mong_data
-        }
+        return {x["id"]: mongo_recurse(x["iadata"], mappings=mongo_map) for x in mong_data}
     else:
         print("No data received from Mongo")
         return []
+
+
+def reverse_mong(letter_code, division, series, piece, level="Item", max_id_range=260000):
+    """
+    Generator that yields ids in 200 id chunks suitable for passing to Kentigern
+
+    :param letter_code
+    :param division
+    :param series
+    :param piece
+    :param level
+    :param max_id_range:
+    :return:
+    """
+    base_id = f"{letter_code}:~{division}:{series}:{piece}"
+    items = [
+        {
+            "id": base_id + ":" + str(i),
+            "level": level,
+            "letter_code": letter_code,
+            "class_no": series,
+            "series": str(series),
+            "division_no": str(division),
+            "item_ref": str(i),
+            "catalogue_ref": f"{letter_code} {series}/{piece}/{i}",
+            "piece_ref": str(piece),
+
+        }
+        for i in range(1, max_id_range)
+    ]
+    for group in grouper(items, 200, fillvalue=None):
+        yield [g for g in group if g is not None]
+
+
+def iterate_reverse_mong(rev, nlp_proc=None):
+    """
+    Iterate a list of ids that have been provided by the reverse_mong function (that just generates some IDs)
+    fetching the records from mongo via Kentigern and decorating with NLP.
+
+    :param rev:
+    :param nlp_proc: optional spacy NLP model
+    :return:
+    """
+    for item_list in rev:
+        mongos = [m for m in get_mongo(obj_list=item_list, spacy_nlp=nlp_proc) if m.get("mongo")]
+        if mongos:
+            yield mongos
+        else:
+            break
+
+
+if __name__ == "__main__":
+    import spacy
+
+    nlp = spacy.load("en_core_web_sm")
+    count = 0
+    for x in iterate_reverse_mong(reverse_mong(
+        letter_code="WO",
+        division=16,
+        series=372,
+        piece=1,
+        level="Item"
+    ), nlp_proc=None):
+        print(x[0])
+        print(make_canonical(x[0]))
