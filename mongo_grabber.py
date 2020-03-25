@@ -247,6 +247,7 @@ def extract_medal_card_details(mongo_object):
 
 
 if __name__ == "__main__":
+    es_index = "test-index"
     import spacy
 
     nlp = spacy.load("en_core_web_sm")
@@ -265,15 +266,15 @@ if __name__ == "__main__":
         ]
     )
     for piece_ in range(1, 30):
-        es.indices.put_settings(index="test-index", body=es_index_settings)
+        es.indices.put_settings(index=es_index, body=es_index_settings)
         es_iterator(
             elastic=es,
-            elastic_index="test-index",
+            elastic_index=es_index,
             level=6,
             cursor_output=medal_cards(spacy_nlp=nlp, piece=piece_),
             verbosity=False,
             ingest=True,
         )
-        es.indices.put_settings(index="test-index", body=es_index_done_settings)
+        es.indices.put_settings(index=es_index, body=es_index_done_settings)
 
 
