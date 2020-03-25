@@ -235,7 +235,6 @@ def make_canonical(row_dict: Dict) -> Dict:
             ("Item", row_dict.get("item_ref")),
         ]
     )
-    print(row_dict["path"])
     # 3. Work out what level THIS object is at in the hierarchy.
     row_dict["level"] = [k for k, v in row_dict["path"].items() if v][-1]
     # 4. Generate the catalogue reference
@@ -259,6 +258,10 @@ def make_canonical(row_dict: Dict) -> Dict:
             set([x for x in also_matches if x not in row_dict["matches"]])
         )
     # 7. Create an Elasticsearch readable data, and an object with year, month, day, etc for the start date for this
+    if row_dict["mongo"].get("covering_from_date"):
+        row_dict["first_date"] = row_dict["mongo"]["covering_from_date"]
+    if row_dict["mongo"].get("covering_to_date"):
+        row_dict["last_date"] = row_dict["mongo"]["covering_to_date"]
     if row_dict.get("first_date"):
         row_dict["first_date"], row_dict["first_date_obj"] = gen_date(
             str(row_dict["first_date"]), row_dict["id"], row_dict["catalogue_ref"]
