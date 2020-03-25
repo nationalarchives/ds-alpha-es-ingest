@@ -264,8 +264,8 @@ if __name__ == "__main__":
             }
         ]
     )
-    es.indices.put_settings(index="test-index", body=es_index_settings)
     for piece_ in range(1, 30):
+        es.indices.put_settings(index="test-index", body=es_index_settings)
         es_iterator(
             elastic=es,
             elastic_index="test-index",
@@ -274,6 +274,6 @@ if __name__ == "__main__":
             verbosity=False,
             ingest=True,
         )
-    es.indices.put_settings(index="test-index", body=es_index_done_settings)
+        es.indices.put_settings(index="test-index", body=es_index_done_settings)
 
 
