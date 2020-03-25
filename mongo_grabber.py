@@ -259,24 +259,21 @@ if __name__ == "__main__":
                 "host": "vpc-dev-elasticsearch-6njgchnnn3kml3qbyhrp52g37m.eu-west-2.es.amazonaws.com",
                 "use_ssl": True,
                 "verify_certs": False,
-                "port": 9201,
+                "port": 443,
                 # "ca_certs": certifi.where(),
             }
         ]
     )
     es.indices.put_settings(index="test-index", body=es_index_settings)
-    es_iterator(
-        elastic=es,
-        elastic_index="test-index",
-        level=6,
-        cursor_output=medal_cards(spacy_nlp=nlp, piece=17),
-        verbosity=False,
-        ingest=True,
-    )
+    for piece_ in range(1, 30):
+        es_iterator(
+            elastic=es,
+            elastic_index="test-index",
+            level=6,
+            cursor_output=medal_cards(spacy_nlp=nlp, piece=piece_),
+            verbosity=False,
+            ingest=True,
+        )
     es.indices.put_settings(index="test-index", body=es_index_done_settings)
 
-
-    # for foo in medal_cards(spacy_nlp=nlp, piece=17):
-    #     for x in ingest_list(foo):
-    #         print(x)
 
