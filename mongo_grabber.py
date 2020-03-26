@@ -173,7 +173,7 @@ def reverse_mong(letter_code, division, series, piece, level="Item", max_id_rang
         yield [g for g in group if g is not None]
 
 
-def iterate_reverse_mong(rev, nlp_proc=None):
+def iterate_reverse_mong(rev, nlp_proc=None, piece=None):
     """
     Iterate a list of ids that have been provided by the reverse_mong function (that just generates some IDs)
     fetching the records from mongo via Kentigern and decorating with NLP.
@@ -191,7 +191,7 @@ def iterate_reverse_mong(rev, nlp_proc=None):
         ]
         if mongos:
             count += 1
-            print(f"Iteration: {count}")
+            print(f"Piece {piece} Records: {count * 200}")
             yield mongos
         else:
             break
@@ -200,7 +200,7 @@ def iterate_reverse_mong(rev, nlp_proc=None):
 def medal_cards(spacy_nlp, piece):
     for x in iterate_reverse_mong(
         reverse_mong(letter_code="WO", division=16, series=372, piece=piece, level="Item"),
-        nlp_proc=spacy_nlp,
+        nlp_proc=spacy_nlp, piece=piece
     ):
         yield [make_canonical(c) for c in x]
 
