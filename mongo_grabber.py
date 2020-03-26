@@ -8,7 +8,7 @@ from iteration_utilities import grouper
 from es_docs_mongo import make_canonical, es_iterator
 from bs4 import BeautifulSoup
 from elasticsearch import Elasticsearch
-
+import certifi
 
 logger = logging.getLogger("waitress")
 logger.setLevel(logging.DEBUG)
@@ -217,37 +217,35 @@ def extract_medal_card_details(mongo_object):
                 details["person"]["forenames"] = person.find(
                     "emph", {"altrender": "forenames"}
                 ).contents[0]
-            except AttributeError:
+            except AttributeError or IndexError:
                 details["person"]["forenames"] = None
             try:
                 details["person"]["surname"] = person.find("emph", {"altrender": "surname"}).contents[0]
-            except AttributeError:
+            except AttributeError or IndexError:
                 details["person"]["surname"] = None
             details["person"]["combined_name"] = f'{details["person"]["forenames"]} {details["person"]["surname"]}'
         for detail in soup.find_all("emph", {"altrender": "medal"}):
             try:
                 corps = detail.find("corpname").contents[0]
-            except AttributeError:
+            except AttributeError or IndexError:
                 corps = None
             try:
                 regiment_no = detail.find("emph", {"altrender": "regno"}).contents[0]
-            except AttributeError:
+            except AttributeError or IndexError:
                 regiment_no = None
             try:
                 rank = detail.find("emph", {"altrender": "rank"}).contents[0]
-            except AttributeError:
+            except AttributeError or IndexError:
                 rank = None
             details["details"].append({"corps": corps, "regiment_no": regiment_no, "rank": rank})
         mongo_object["medal_card"] = details
         return mongo_object
     except:
-        raise
-    # except AttributeError:
-    #     return mongo_object
+        return mongo_object
 
 
 if __name__ == "__main__":
-    es_index = "test-index"
+    es_index = "path-resolver-mongo"
     import spacy
 
     nlp = spacy.load("en_core_web_sm")
@@ -259,20 +257,21 @@ if __name__ == "__main__":
             {
                 "host": "vpc-dev-elasticsearch-6njgchnnn3kml3qbyhrp52g37m.eu-west-2.es.amazonaws.com",
                 "use_ssl": True,
-                "verify_certs": False,
+                "verify_certs": True,
                 "port": 443,
-                # "ca_certs": certifi.where(),
+                "ca_certs": certifi.where(),
             }
         ]
     )
     for piece_ in range(1, 30):
+        print(f"Working on {piece_} of 30")
         es.indices.put_settings(index=es_index, body=es_index_settings)
         es_iterator(
             elastic=es,
             elastic_index=es_index,
             level=6,
             cursor_output=medal_cards(spacy_nlp=nlp, piece=piece_),
-            verbosity=False,
+            verbosity=True,
             ingest=True,
         )
         es.indices.put_settings(index=es_index, body=es_index_done_settings)
