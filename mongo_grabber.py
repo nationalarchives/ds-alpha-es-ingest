@@ -182,6 +182,7 @@ def iterate_reverse_mong(rev, nlp_proc=None):
     :param nlp_proc: optional spacy NLP model
     :return:
     """
+    count = 0
     for item_list in rev:
         mongos = [
             extract_medal_card_details(m)
@@ -189,6 +190,8 @@ def iterate_reverse_mong(rev, nlp_proc=None):
             if m.get("mongo")
         ]
         if mongos:
+            count += 1
+            print(f"Iteration: {count}")
             yield mongos
         else:
             break
