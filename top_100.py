@@ -62,6 +62,18 @@ def identify_tops():
             key = v["cat_ref"]
             simplified_item = dict(description=v["description"],
                                    document_format=v.get("document_format"))
+            if key:
+                imagelibrequest = requests.get(f"https://alpha.nationalarchives.gov.uk/image-library/catref/{key}")
+                if imagelibrequest.status_code == requests.codes.ok:
+                    simplified_item["image_library"] = imagelibrequest.json()
+                replicarequest = requests.get(f"https://alpha.nationalarchives.gov.uk/replica/catref/{key}")
+                if replicarequest.status_code == requests.codes.ok:
+                    simplified_item["replica"] = replicarequest.json()
+                    image_files = simplified_item["replica"].get("Files")
+                    if image_files:
+                        image_file = image_files[0].get("Name")
+                        if image_file:
+                            simplified_item["iiif_component"] = image_file
             yield key, simplified_item
 
 
@@ -90,18 +102,25 @@ def ingest_list(item_list: List, index: str = "test-index") -> Dict:
         }
 
 
-def fetch_es_record(key, item, es_, index="path-resolver-taxonomy"):
+def fetch_es_record(key, item, es_, index="path-resolver-mongo"):
     """
 
     :param key:
     :param item:
     :param es_:
+    :param index
     :return:
     """
     resolver_dict = get_matches(es_=es_, es_index=index, path=key)
     try:
         c = resolver_dict["canonical"][0]
         doc = c
+        if doc.get("iaid"):
+            if item.get("iiif_component"):
+                doc["iiif_full"] = f"https://ctest-discovery.nationalarchives.gov.uk/image/{doc['iaid']}/" \
+                                   f"{item['iiif_component'].replace('66/','')}/full/full/0/default.jpg"
+                doc["iiif_thumb"] = f"https://ctest-discovery.nationalarchives.gov.uk/image/{doc['iaid']}/" \
+                                    f"{item['iiif_component'].replace('66/','')}/full/155,/0/default.jpg"
         doc["top_items"] = [item]
         doc["top_item"] = True
         ident_ = doc["id"]
@@ -151,6 +170,9 @@ def p_bulk(es_, index_: str, iterator, chunk: int = 200, verbose: bool = True):
 
 
 if __name__ == "__main__":
+    import json
+    # for x in identify_tops():
+    #     print(json.dumps(x, indent=2))
     es = Elasticsearch(
         hosts=[
             {
@@ -164,10 +186,11 @@ if __name__ == "__main__":
     )
     import json
     #
+
     highlights = [fetch_es_record(*i, es) for i in identify_tops()]
     chunked_highlights = [n for n in highlights if n]
     print(len(chunked_highlights))
-    # print(json.dumps(chunked_highlights, indent=2))
-    # p_bulk(es_=es, iterator=chunked_highlights, index_="path-resolver-taxonomy", verbose=False)
+    print(json.dumps(chunked_highlights, indent=2))
+    # p_bulk(es_=es, iterator=chunked_highlights, index_="path-resolver-mongo", verbose=False)
 
 
