@@ -102,27 +102,36 @@ def string_to_entities(
                         else:
                             d = dateparser.parse(entity)
                         if d:
-                            end_year = dateparser.parse(
-                                entity,
-                                settings={
-                                    "RELATIVE_BASE": datetime.datetime(2020, 12, 31)
-                                },
-                            )
-                            start_year = dateparser.parse(
-                                entity,
-                                settings={
-                                    "RELATIVE_BASE": datetime.datetime(2020, 1, 1)
-                                },
-                            )
-                            date_ents.append(
-                                {
-                                    "text": entity,
-                                    "date": f"{d}",
-                                    "label": "DATE",
-                                    "year_start": start_year,
-                                    "year_end": end_year,
-                                }
-                            )
+                            try:
+                                end_year = dateparser.parse(
+                                    entity,
+                                    settings={
+                                        "RELATIVE_BASE": datetime.datetime(2020, 12, 31)
+                                    },
+                                )
+                            except ValueError:
+                                end_year = None
+                            try:
+                                start_year = dateparser.parse(
+                                    entity,
+                                    settings={
+                                        "RELATIVE_BASE": datetime.datetime(2020, 1, 1)
+                                    },
+                                )
+                            except ValueError:
+                                start_year = None
+                            if start_year and end_year:
+                                date_ents.append(
+                                    {
+                                        "text": entity,
+                                        "date": f"{d}",
+                                        "label": "DATE",
+                                        "year_start": start_year,
+                                        "year_end": end_year,
+                                    }
+                                )
+                            else:
+                                date_ents.append({"text": entity, "label": "DATE"})
                         else:  # Date parser couldn't identify the date, but we know it is one.
                             date_ents.append({"text": entity, "label": "DATE"})
                 elif ent.label_ == "PERSON":
