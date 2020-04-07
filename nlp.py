@@ -95,12 +95,17 @@ def string_to_entities(
                     else:  # Or we don't
                         split_ents = [ent.text]
                     for entity in split_ents:
-                        if is_int(
-                            entity
-                        ):  # Handle cases where this is a year only, to avoid insertion of today
-                            d = dateparser.parse(entity).year
-                        else:
-                            d = dateparser.parse(entity)
+                        try:
+                            if is_int(
+                                entity
+                            ):  # Handle cases where this is a year only, to avoid insertion of today
+                                d = dateparser.parse(entity).year
+                            else:
+                                if str(entity[0]) == "-":
+                                    entity = str(entity[1:])
+                                d = dateparser.parse(entity)
+                        except ValueError:
+                            d = None
                         if d:
                             try:
                                 end_year = dateparser.parse(
