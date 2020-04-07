@@ -104,7 +104,7 @@ def string_to_entities(
                                 if str(entity[0]) == "-":
                                     entity = str(entity[1:])
                                 d = dateparser.parse(entity)
-                        except ValueError:
+                        except ValueError or IndexError:
                             d = None
                         if d:
                             try:
