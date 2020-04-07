@@ -95,50 +95,54 @@ def string_to_entities(
                     else:  # Or we don't
                         split_ents = [ent.text]
                     for entity in split_ents:
-                        try:
-                            if is_int(
-                                entity
-                            ):  # Handle cases where this is a year only, to avoid insertion of today
-                                d = dateparser.parse(entity).year
-                            else:
-                                if str(entity[0]) == "-":
-                                    entity = str(entity[1:])
-                                d = dateparser.parse(entity)
-                        except ValueError or IndexError:
-                            d = None
-                        if d:
+                        if entity:
                             try:
-                                end_year = dateparser.parse(
-                                    entity,
-                                    settings={
-                                        "RELATIVE_BASE": datetime.datetime(2020, 12, 31)
-                                    },
-                                )
-                            except ValueError:
-                                end_year = None
-                            try:
-                                start_year = dateparser.parse(
-                                    entity,
-                                    settings={
-                                        "RELATIVE_BASE": datetime.datetime(2020, 1, 1)
-                                    },
-                                )
-                            except ValueError:
-                                start_year = None
-                            if start_year and end_year:
-                                date_ents.append(
-                                    {
-                                        "text": entity,
-                                        "date": f"{d}",
-                                        "label": "DATE",
-                                        "year_start": start_year,
-                                        "year_end": end_year,
-                                    }
-                                )
-                            else:
+                                if is_int(
+                                    entity
+                                ):  # Handle cases where this is a year only, to avoid insertion of today
+                                    d = dateparser.parse(entity).year
+                                else:
+                                    try:
+                                        if str(entity[0]) == "-":
+                                            entity = str(entity[1:])
+                                        d = dateparser.parse(entity)
+                                    except ValueError or IndexError:
+                                        d = None
+                            except ValueError or IndexError:
+                                d = None
+                            if d:
+                                try:
+                                    end_year = dateparser.parse(
+                                        entity,
+                                        settings={
+                                            "RELATIVE_BASE": datetime.datetime(2020, 12, 31)
+                                        },
+                                    )
+                                except ValueError:
+                                    end_year = None
+                                try:
+                                    start_year = dateparser.parse(
+                                        entity,
+                                        settings={
+                                            "RELATIVE_BASE": datetime.datetime(2020, 1, 1)
+                                        },
+                                    )
+                                except ValueError:
+                                    start_year = None
+                                if start_year and end_year:
+                                    date_ents.append(
+                                        {
+                                            "text": entity,
+                                            "date": f"{d}",
+                                            "label": "DATE",
+                                            "year_start": start_year,
+                                            "year_end": end_year,
+                                        }
+                                    )
+                                else:
+                                    date_ents.append({"text": entity, "label": "DATE"})
+                            else:  # Date parser couldn't identify the date, but we know it is one.
                                 date_ents.append({"text": entity, "label": "DATE"})
-                        else:  # Date parser couldn't identify the date, but we know it is one.
-                            date_ents.append({"text": entity, "label": "DATE"})
                 elif ent.label_ == "PERSON":
                     try:
                         variants = names.name_initials(
