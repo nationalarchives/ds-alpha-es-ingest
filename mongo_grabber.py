@@ -65,11 +65,14 @@ def get_mongo(obj_list, spacy_nlp=None, medal_card=False):
                 if e:
                     obj.update(e)
                 if obj["id"].startswith("C:"):
-                    if obj.get("mongo", None).get("scope_and_content", None).get("description", None):
-                        obj_d = obj["mongo"]["scope_and_content"]["description"]
-                        if ("Short title" in obj_d) or ("Plaintiffs" in obj_d) or ("Defendants" in obj_d):
-                            obj["chancery"] = parse_description(description=obj_d, spacy_nlp=spacy_nlp)
-                            print(json.dumps(obj["chancery"], indent=2))
+                    if obj.get("mongo"):
+                        scope = obj["mongo"].get("scope_and_content")
+                        if scope:
+                            obj_d = scope.get("description")
+                            if obj_d:
+                                if ("Short title" in obj_d) or ("Plaintiffs" in obj_d) or ("Defendants" in obj_d):
+                                    obj["chancery"] = parse_description(description=obj_d, spacy_nlp=spacy_nlp)
+                                    print(json.dumps(obj["chancery"], indent=2))
         return new_obj_list
     else:
         return obj_list
