@@ -41,11 +41,6 @@ def parse_description(description, spacy_nlp):
     text = clean_text(description)
     short_title = {
         "text": text_between(text, "Short title:"),
-        # "entities": string_to_entities(
-        #     input_string=text_between(text, "Short title:"),
-        #     nlp=spacy_nlp,
-        #     ent_types=["PERSON", "ORG"],
-        # ).get("entities_by_type"),
     }
     plaintiffs = {"text": text_between(text, "Plaintiffs:"),
                   "entities": string_to_entities(
@@ -62,11 +57,6 @@ def parse_description(description, spacy_nlp):
                   ).get("entities_by_type"),
                   }
     subject = {"text": text_between(text, "Subject:"),
-               # "entities": string_to_entities(
-               #     input_string=text_between(text, "Subject:").strip(),
-               #     nlp=spacy_nlp,
-               #     ent_types=["PERSON", "ORG", "GPE", "FAC", "LOC", "DATE"],
-               # ).get("entities_by_type"),
                }
     document_type = {"text": text_between(text, "Document type:")}
     data = dict(
