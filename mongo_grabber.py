@@ -6,6 +6,7 @@ import logging
 from nlp import flatten_to_string, string_to_entities
 from iteration_utilities import grouper
 from es_docs_mongo import make_canonical, es_iterator
+from chancery import parse_description
 from bs4 import BeautifulSoup
 from elasticsearch import Elasticsearch
 import certifi
@@ -63,6 +64,12 @@ def get_mongo(obj_list, spacy_nlp=None, medal_card=False):
                 e = string_to_entities(input_string=flatten_to_string(obj), nlp=spacy_nlp, medal_card=medal_card)
                 if e:
                     obj.update(e)
+                if obj["id"].startswith("C:"):
+                    if obj.get("mongo", None).get("scope_and_content", None).get("description", None):
+                        obj_d = obj["mongo"]["scope_and_content"]["description"]
+                        if ("Short title" in obj_d) or ("Plaintiffs" in obj_d) or ("Defendants" in obj_d):
+                            obj["chancery"] = parse_description(description=obj_d, spacy_nlp=spacy_nlp)
+                            print(json.dumps(obj["chancery"], indent=2))
         return new_obj_list
     else:
         return obj_list
@@ -266,17 +273,17 @@ if __name__ == "__main__":
             }
         ]
     )
-    for piece_ in range(1, 30):
-        print(f"Working on {piece_} of 30")
-        es.indices.put_settings(index=es_index, body=es_index_settings)
-        es_iterator(
-            elastic=es,
-            elastic_index=es_index,
-            level=6,
-            cursor_output=medal_cards(spacy_nlp=nlp, piece=piece_),
-            verbosity=True,
-            ingest=True,
-        )
-        es.indices.put_settings(index=es_index, body=es_index_done_settings)
+    # for piece_ in range(1, 30):
+    #     print(f"Working on {piece_} of 30")
+    #     es.indices.put_settings(index=es_index, body=es_index_settings)
+    #     es_iterator(
+    #         elastic=es,
+    #         elastic_index=es_index,
+    #         level=6,
+    #         cursor_output=medal_cards(spacy_nlp=nlp, piece=piece_),
+    #         verbosity=True,
+    #         ingest=True,
+    #     )
+    #     es.indices.put_settings(index=es_index, body=es_index_done_settings)
 
 
