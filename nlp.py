@@ -79,11 +79,12 @@ def string_to_entities(
         date_ents = []
         name_ents = []
         ents = []
-        for c in places.cities:
-            geo_ents.append({"text": c, "label": "GPE"})
-        for c in places.country_mentions:
-            geo_ents.append({"text": c, "label": "GPE"})
-            ents.append({"text": c, "label": "GPE"})
+        if any(i in ent_types for i in ["GPE", "FAC", "LOC"]):
+            for c in places.cities:
+                geo_ents.append({"text": c, "label": "GPE"})
+            for c in places.country_mentions:
+                geo_ents.append({"text": c, "label": "GPE"})
+                ents.append({"text": c, "label": "GPE"})
         # Use flash text to get the bounds for the non-Spacy entities
         # Can also be used later to decorate with, e.g. the orgnames from Mongo
         for ent in doc.ents:
