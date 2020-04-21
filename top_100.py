@@ -185,12 +185,11 @@ if __name__ == "__main__":
         ]
     )
     import json
-    #
-
     highlights = [fetch_es_record(*i, es) for i in identify_tops()]
     chunked_highlights = [n for n in highlights if n]
-    print(len(chunked_highlights))
-    print(json.dumps(chunked_highlights, indent=2))
+    pruned_highlights = [{"mongo": x["doc"]["mongo"], "top_items": x["doc"]["top_items"]} for x in chunked_highlights]
+    with open("staticfiles/top100_chunked.json", "w") as f:
+        json.dump(chunked_highlights, f, indent=2)
     # p_bulk(es_=es, iterator=chunked_highlights, index_="path-resolver-mongo", verbose=False)
 
 
