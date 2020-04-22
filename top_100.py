@@ -6,6 +6,7 @@ from collections import OrderedDict
 from typing import List, Dict
 from elasticsearch.helpers import parallel_bulk
 import requests
+import urllib.request
 
 
 def get_matches(es_, es_index, path):
@@ -21,7 +22,6 @@ def get_matches(es_, es_index, path):
     q = {
         "track_total_hits": True,
         "query": {"bool": {"must": [{"term": {"matches.keyword": path}}]}},
-
     }
     q2 = {
         "track_total_hits": True,
@@ -60,14 +60,21 @@ def identify_tops():
     if input_data:
         for k, v in input_data.items():
             key = v["cat_ref"]
-            simplified_item = dict(description=v["description"],
-                                   document_format=v.get("document_format"))
+            # print(f"Key: {key}")
+            simplified_item = dict(
+                description=v["description"], document_format=v.get("document_format")
+            )
             if key:
-                imagelibrequest = requests.get(f"https://alpha.nationalarchives.gov.uk/image-library/catref/{key}")
+                imagelibrequest = requests.get(
+                    f"https://alpha.nationalarchives.gov.uk/image-library/catref/{key}"
+                )
                 if imagelibrequest.status_code == requests.codes.ok:
                     simplified_item["image_library"] = imagelibrequest.json()
-                replicarequest = requests.get(f"https://alpha.nationalarchives.gov.uk/replica/catref/{key}")
+                replicarequest = requests.get(
+                    f"https://alpha.nationalarchives.gov.uk/replica/catref/{key}"
+                )
                 if replicarequest.status_code == requests.codes.ok:
+                    # print(f"Got replica")
                     simplified_item["replica"] = replicarequest.json()
                     image_files = simplified_item["replica"].get("Files")
                     if image_files:
@@ -117,11 +124,79 @@ def fetch_es_record(key, item, es_, index="path-resolver-mongo"):
         doc = c
         if doc.get("iaid"):
             if item.get("iiif_component"):
-                doc["iiif_full"] = f"https://ctest-discovery.nationalarchives.gov.uk/image/{doc['iaid']}/" \
-                                   f"{item['iiif_component'].replace('66/','')}/full/full/0/default.jpg"
-                doc["iiif_thumb"] = f"https://ctest-discovery.nationalarchives.gov.uk/image/{doc['iaid']}/" \
-                                    f"{item['iiif_component'].replace('66/','')}/full/155,/0/default.jpg"
+                doc[
+                    "iiif_full"
+                ] = f"https://ctest-discovery.nationalarchives.gov.uk/image/{doc['iaid']}/" f"{item['iiif_component'].replace('66/','')}/full/full/0/default.jpg"
+                doc[
+                    "iiif_medium"
+                ] = f"https://ctest-discovery.nationalarchives.gov.uk/image/{doc['iaid']}/" f"{item['iiif_component'].replace('66/','')}/full/256,/0/default.jpg"
+                doc[
+                    "iiif_thumb"
+                ] = f"https://ctest-discovery.nationalarchives.gov.uk/image/{doc['iaid']}/" f"{item['iiif_component'].replace('66/','')}/full/155,/0/default.jpg"
         doc["top_items"] = [item]
+        doc["medium_thumbs"] = []
+        doc["small_thumbs"] = []
+        if item:
+            if item.get("image_library"):
+                if item["image_library"].get("records"):
+                    for record, record_item in item["image_library"]["records"].items():
+                        for image in record_item["images"]:
+                            doc["medium_thumbs"].append(
+                                f"https://nationalarchives.github.io/"
+                                f"ds-alpha-analytics-service/"
+                                f"medium/{image['ImageURL'].split('?id=')[1]}.jpg"
+                            )
+                            doc["small_thumbs"].append(
+                                f"https://nationalarchives.github.io/"
+                                f"ds-alpha-analytics-service/"
+                                f"thumbs/{image['ImageURL'].split('?id=')[1]}.jpg"
+                            )
+                else:
+                    for image in item["image_library"]["images"]:
+                        doc["medium_thumbs"].append(
+                            f"https://nationalarchives.github.io/"
+                            f"ds-alpha-analytics-service/"
+                            f"medium/{image['ImageURL'].split('?id=')[1]}.jpg"
+                        )
+                        doc["small_thumbs"].append(
+                            f"https://nationalarchives.github.io/"
+                            f"ds-alpha-analytics-service/"
+                            f"thumbs/{image['ImageURL'].split('?id=')[1]}.jpg"
+                        )
+        if doc["medium_thumbs"]:
+            verified_thumbs = []
+            for m in doc["medium_thumbs"]:
+                i_req = requests.get(m)
+                if i_req.status_code == requests.codes.ok:
+                    verified_thumbs.append(m)
+            doc["medium_thumbs"] = verified_thumbs
+        if doc["small_thumbs"]:
+            verified_thumbs = []
+            for m in doc["small_thumbs"]:
+                i_req = requests.get(m)
+                if i_req.status_code == requests.codes.ok:
+                    verified_thumbs.append(m)
+            doc["small_thumbs"] = verified_thumbs
+        if doc.get("iiif_thumb") and not doc["small_thumbs"]:
+            print(f"Doc has IIIF but no static image in analytics")
+            print(f"{doc['iiif_thumb']}")
+            image_id = doc['iiif_thumb'].split("/")[-5]
+            s_image_path = f"/Users/matt.mcgrattan/Documents/Github/ds-alpha-analytics-service/" + \
+                           f"docs/thumbs/{image_id}"
+            m_image_path = f"/Users/matt.mcgrattan/Documents/Github/ds-alpha-analytics-service/" + \
+                           f"docs/medium/{image_id}"
+            urllib.request.urlretrieve(doc["iiif_thumb"], s_image_path)
+            urllib.request.urlretrieve(doc["iiif_medium"], m_image_path)
+            doc["small_thumbs"].append(
+                f"https://nationalarchives.github.io/"
+                f"ds-alpha-analytics-service/"
+                f"thumbs/{image_id}"
+            )
+            doc["medium_thumbs"].append(
+                f"https://nationalarchives.github.io/"
+                f"ds-alpha-analytics-service/"
+                f"medium/{image_id}"
+            )
         doc["top_item"] = True
         ident_ = doc["id"]
         es_doc = {
@@ -170,9 +245,18 @@ def p_bulk(es_, index_: str, iterator, chunk: int = 200, verbose: bool = True):
 
 
 if __name__ == "__main__":
+    """
+    This code is very much hacky one-time code.
+    
+    It will run against the top100 list (json stored in the staticdata service), and attempt to
+    update those records in Elasticsearch.
+    
+    It also verifies thumbnails, and will fetch the images that don't exist and put them in a repo for
+    upload later.
+    
+    N.B. this should only be done once.
+    """
     import json
-    # for x in identify_tops():
-    #     print(json.dumps(x, indent=2))
     es = Elasticsearch(
         hosts=[
             {
@@ -184,12 +268,17 @@ if __name__ == "__main__":
             }
         ]
     )
-    import json
+    # Get the elasticrecords for the items identified as top100 items via the staticdata
+    # Enrich in the process
     highlights = [fetch_es_record(*i, es) for i in identify_tops()]
+    # filter out the empty records
     chunked_highlights = [n for n in highlights if n]
-    pruned_highlights = [{"mongo": x["doc"]["mongo"], "top_items": x["doc"]["top_items"]} for x in chunked_highlights]
+    # create a pruned version which was used to dump to file in diagnosing the original ingest
+    pruned_highlights = [
+        {"mongo": x["doc"]["mongo"], "top_items": x["doc"]["top_items"]} for x in chunked_highlights
+    ]
     with open("staticfiles/top100_chunked.json", "w") as f:
         json.dump(chunked_highlights, f, indent=2)
-    # p_bulk(es_=es, iterator=chunked_highlights, index_="path-resolver-mongo", verbose=False)
-
-
+    # If this is uncommented, it will push the enriched data back into Elastic
+    print("Putting the stuff into Elastic")
+    p_bulk(es_=es, iterator=chunked_highlights, index_="path-resolver-mongo", verbose=False)
