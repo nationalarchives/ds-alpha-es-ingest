@@ -26,7 +26,7 @@ from settings import (
     es_resolver_index,
     es_port,
     es_host,
-    es_update
+    es_update,
 )
 import logging
 import certifi
@@ -288,31 +288,13 @@ def make_canonical(row_dict: Dict) -> Dict:
             row_dict["subjects"] = t.get("taxonomy_ids")
         if row_dict.get("subjects"):
             row_dict["subjects"] += [
-                {
-                    "code": "C10092",
-                    "subject_name": "Army",
-                    "subject": "army"
-                },
-                {
-                    "code": "C10060",
-                    "subject_name": "Medals",
-                    "subject": "medals"
-                }
-
+                {"code": "C10092", "subject_name": "Army", "subject": "army"},
+                {"code": "C10060", "subject_name": "Medals", "subject": "medals"},
             ]
         else:
             row_dict["subjects"] = [
-                {
-                    "code": "C10092",
-                    "subject_name": "Army",
-                    "subject": "army"
-                },
-                {
-                    "code": "C10060",
-                    "subject_name": "Medals",
-                    "subject": "medals"
-                }
-
+                {"code": "C10092", "subject_name": "Army", "subject": "army"},
+                {"code": "C10060", "subject_name": "Medals", "subject": "medals"},
             ]
 
     return row_dict
@@ -588,7 +570,9 @@ def process_data(
             total = sum([int(v) for k, v in stats.items()])
             sleep_time = int(total / 100000)
             yield f"Received size from stats service and calculated sleep time between cycles as: {sleep_time}<br>"
-            es_logger.info(f"Received size from stats service and calculated sleep time between cycles as: {sleep_time}<br>")
+            es_logger.info(
+                f"Received size from stats service and calculated sleep time between cycles as: {sleep_time}<br>"
+            )
 
         else:
             sleep_time = 15

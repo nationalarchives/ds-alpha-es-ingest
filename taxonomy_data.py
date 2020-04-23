@@ -64,5 +64,7 @@ def make_taxonomy_lookup():
 
 
 if __name__ == "__main__":
-    parse_taxonomy_files(source_dir="/home/ec2-user/Python-3.8.1/ds-alpha-code/ildbweb/Graph/tmp/TAXONOMY/")
+    parse_taxonomy_files(
+        source_dir="/home/ec2-user/Python-3.8.1/ds-alpha-code/ildbweb/Graph/tmp/TAXONOMY/"
+    )
     # make_taxonomy_lookup()

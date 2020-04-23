@@ -32,7 +32,7 @@ def check_date_overlap(start_obj, end_obj, start_era, end_era):
     :param end_era:
     :return:
     """
-    Range = namedtuple('Range', ['start', 'end'])
+    Range = namedtuple("Range", ["start", "end"])
     # Just make a date that spans the entire history of tNA if no bound provided
     if not start_obj:
         s = datetime(974, 1, 1)  # Start of medieval period
@@ -42,10 +42,8 @@ def check_date_overlap(start_obj, end_obj, start_era, end_era):
         e = datetime.today()  # Today
     else:
         e = datetime(end_obj["year"], end_obj["month"], end_obj["day"])
-    r1 = Range(start=s,
-               end=e)
-    r2 = Range(start=start_era,
-               end=end_era)
+    r1 = Range(start=s, end=e)
+    r2 = Range(start=start_era, end=end_era)
     latest_start = max(r1.start, r2.start)
     earliest_end = min(r1.end, r2.end)
     delta = (earliest_end - latest_start).days + 1
@@ -60,8 +58,12 @@ def identify_eras(era_dict, item_start, item_end):
     if era_dict and item_start and item_end:
         eras = []
         for k, v in era_dict.items():
-            match = check_date_overlap(start_obj=item_start, end_obj=item_end,
-                                       start_era=v["era_start"], end_era=v["era_end"])
+            match = check_date_overlap(
+                start_obj=item_start,
+                end_obj=item_end,
+                start_era=v["era_start"],
+                end_era=v["era_end"],
+            )
             if match:
                 eras.append(k)
         return eras
@@ -110,8 +112,9 @@ def gen_date(datestring, identifier, catalogue_ref):
         return d_string, d_dict
     except ValueError:
         with open("date_errors.txt", "a") as df:
-            df.writelines(f"ID: {identifier} - Cat Ref: {catalogue_ref} - Date with "
-                          f"error: {datestring}\n")
+            df.writelines(
+                f"ID: {identifier} - Cat Ref: {catalogue_ref} - Date with " f"error: {datestring}\n"
+            )
             return fallback_date_parser(datestring)
 
 
@@ -123,4 +126,3 @@ if __name__ == "__main__":
     print(e)
     eras_ = identify_eras(era_dict=e, item_start=a, item_end=b)
     print(eras_)
-

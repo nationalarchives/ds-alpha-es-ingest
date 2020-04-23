@@ -61,7 +61,9 @@ def get_mongo(obj_list, spacy_nlp=None, medal_card=False):
             if obj["mongo"]:
                 obj["iaid"] = obj["mongo"]["iaid"]
             if spacy_nlp:
-                e = string_to_entities(input_string=flatten_to_string(obj), nlp=spacy_nlp, medal_card=medal_card)
+                e = string_to_entities(
+                    input_string=flatten_to_string(obj), nlp=spacy_nlp, medal_card=medal_card
+                )
                 if e:
                     obj.update(e)
                 if obj["id"].startswith("C:"):
@@ -70,8 +72,14 @@ def get_mongo(obj_list, spacy_nlp=None, medal_card=False):
                         if scope:
                             obj_d = scope.get("description")
                             if obj_d:
-                                if ("Short title" in obj_d) or ("Plaintiffs" in obj_d) or ("Defendants" in obj_d):
-                                    obj["chancery"] = parse_description(description=obj_d, spacy_nlp=spacy_nlp)
+                                if (
+                                    ("Short title" in obj_d)
+                                    or ("Plaintiffs" in obj_d)
+                                    or ("Defendants" in obj_d)
+                                ):
+                                    obj["chancery"] = parse_description(
+                                        description=obj_d, spacy_nlp=spacy_nlp
+                                    )
                                     print(json.dumps(obj["chancery"], indent=2))
         return new_obj_list
     else:
@@ -210,7 +218,8 @@ def iterate_reverse_mong(rev, nlp_proc=None, piece=None):
 def medal_cards(spacy_nlp, piece):
     for x in iterate_reverse_mong(
         reverse_mong(letter_code="WO", division=16, series=372, piece=piece, level="Item"),
-        nlp_proc=spacy_nlp, piece=piece
+        nlp_proc=spacy_nlp,
+        piece=piece,
     ):
         yield [make_canonical(c) for c in x]
 
@@ -233,10 +242,14 @@ def extract_medal_card_details(mongo_object):
             except AttributeError or IndexError:
                 details["person"]["forenames"] = None
             try:
-                details["person"]["surname"] = person.find("emph", {"altrender": "surname"}).contents[0]
+                details["person"]["surname"] = person.find(
+                    "emph", {"altrender": "surname"}
+                ).contents[0]
             except AttributeError or IndexError:
                 details["person"]["surname"] = None
-            details["person"]["combined_name"] = f'{details["person"]["forenames"]} {details["person"]["surname"]}'
+            details["person"][
+                "combined_name"
+            ] = f'{details["person"]["forenames"]} {details["person"]["surname"]}'
         for detail in soup.find_all("emph", {"altrender": "medal"}):
             try:
                 corps = detail.find("corpname").contents[0]
@@ -288,5 +301,3 @@ if __name__ == "__main__":
     #         ingest=True,
     #     )
     #     es.indices.put_settings(index=es_index, body=es_index_done_settings)
-
-

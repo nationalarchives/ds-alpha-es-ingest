@@ -115,4 +115,3 @@ def division_query(lettercode: str) -> str:
     INNER JOIN tbl_Division ON tbl_lettercode.lettercode_id = tbl_Division.lettercode_id
     WHERE tbl_lettercode.letter_code = '{lettercode}'
     """
-

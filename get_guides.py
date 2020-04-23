@@ -13,7 +13,7 @@ def load_guide_data():
     :return: guides
     :rtype: dict
     """
-    with open('app/data/references_in_guides_backlinked_deduped.min.json') as guides:
+    with open("app/data/references_in_guides_backlinked_deduped.min.json") as guides:
         guides = json.load(guides)
 
     return guides
@@ -33,9 +33,9 @@ def get_guides_for_lettercode(lettercode):
 
     if lettercode:
         if lettercode in guides:
-            if 'guides' in guides[lettercode]:
-                return guides[lettercode]['guides']
-    return ''
+            if "guides" in guides[lettercode]:
+                return guides[lettercode]["guides"]
+    return ""
 
 
 def get_guides_for_series(lettercode, series):
@@ -51,10 +51,10 @@ def get_guides_for_series(lettercode, series):
     guides = load_guide_data()
 
     if lettercode in guides:
-        if series in guides[lettercode]['records']:
-            if 'guides' in guides[lettercode]['records'][series]:
-                return guides[lettercode]['records'][series]['guides']
-    return ''
+        if series in guides[lettercode]["records"]:
+            if "guides" in guides[lettercode]["records"][series]:
+                return guides[lettercode]["records"][series]["guides"]
+    return ""
 
 
 def get_guides_for_reference(lettercode, series, reference):
@@ -69,13 +69,13 @@ def get_guides_for_reference(lettercode, series, reference):
     guides = load_guide_data()
 
     if lettercode in guides:
-        if series in guides[lettercode]['records']:
-            if 'records' in guides[lettercode]['records'][series]:
-                if reference in guides[lettercode]['records'][series]['records']:
-                    if 'guides' in guides[lettercode]['records'][series]['records'][reference]:
-                        return guides[lettercode]['records'][series]['records'][reference]['guides']
+        if series in guides[lettercode]["records"]:
+            if "records" in guides[lettercode]["records"][series]:
+                if reference in guides[lettercode]["records"][series]["records"]:
+                    if "guides" in guides[lettercode]["records"][series]["records"][reference]:
+                        return guides[lettercode]["records"][series]["records"][reference]["guides"]
 
-    return ''
+    return ""
 
 
 def get_guides(ref):
@@ -87,14 +87,14 @@ def get_guides(ref):
     """
     fragments = get_fragments(ref)
 
-    letter_code = fragments['letter_code']
-    series = fragments['series']
-    reference = fragments['reference']
+    letter_code = fragments["letter_code"]
+    series = fragments["series"]
+    reference = fragments["reference"]
 
     results = {
         reference: get_guides_for_reference(letter_code, series, reference),
         series: get_guides_for_series(letter_code, series),
-        letter_code: get_guides_for_lettercode(letter_code)
+        letter_code: get_guides_for_lettercode(letter_code),
     }
 
     return results

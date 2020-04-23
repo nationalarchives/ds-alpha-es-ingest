@@ -40,7 +40,7 @@ def flatten_to_string(input_obj):
         "mongo.former_reference_dept",
         "mongo.administrative_background",
         "mongo.arrangement",
-        "mongo.custodial_history"
+        "mongo.custodial_history",
     ]
     flat = " ".join([x for x in [dictor(input_obj, k) for k in source_keys] if x])
     return flat
@@ -59,8 +59,10 @@ def entity_list_to_dict(entity_list):
 
 
 def string_to_entities(
-    input_string: str, nlp, ent_types=("DATE", "GPE", "ORG", "FAC", "LOC", "PERSON"),
-        medal_card=False
+    input_string: str,
+    nlp,
+    ent_types=("DATE", "GPE", "ORG", "FAC", "LOC", "PERSON"),
+    medal_card=False,
 ):
     """
 
@@ -155,11 +157,7 @@ def string_to_entities(
                         except IndexError or KeyError or ValueError:
                             sorted_v = None
                         name_ents.append(
-                            {
-                                "text": ent.text,
-                                "label": ent.label_,
-                                "variants": sorted_v,
-                            }
+                            {"text": ent.text, "label": ent.label_, "variants": sorted_v}
                         )
                     else:  # Just iterate the entities
                         matches = [e["text"] for e in ents + date_ents + name_ents]
@@ -174,4 +172,3 @@ def string_to_entities(
                 "entities_by_type": entity_list_to_dict(master_list),
             }
     return
-

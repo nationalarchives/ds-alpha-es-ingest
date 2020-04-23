@@ -180,11 +180,15 @@ def fetch_es_record(key, item, es_, index="path-resolver-mongo"):
         if doc.get("iiif_thumb") and not doc["small_thumbs"]:
             print(f"Doc has IIIF but no static image in analytics")
             print(f"{doc['iiif_thumb']}")
-            image_id = doc['iiif_thumb'].split("/")[-5]
-            s_image_path = f"/Users/matt.mcgrattan/Documents/Github/ds-alpha-analytics-service/" + \
-                           f"docs/thumbs/{image_id}"
-            m_image_path = f"/Users/matt.mcgrattan/Documents/Github/ds-alpha-analytics-service/" + \
-                           f"docs/medium/{image_id}"
+            image_id = doc["iiif_thumb"].split("/")[-5]
+            s_image_path = (
+                f"/Users/matt.mcgrattan/Documents/Github/ds-alpha-analytics-service/"
+                + f"docs/thumbs/{image_id}"
+            )
+            m_image_path = (
+                f"/Users/matt.mcgrattan/Documents/Github/ds-alpha-analytics-service/"
+                + f"docs/medium/{image_id}"
+            )
             urllib.request.urlretrieve(doc["iiif_thumb"], s_image_path)
             urllib.request.urlretrieve(doc["iiif_medium"], m_image_path)
             doc["small_thumbs"].append(
@@ -257,6 +261,7 @@ if __name__ == "__main__":
     N.B. this should only be done once.
     """
     import json
+
     es = Elasticsearch(
         hosts=[
             {

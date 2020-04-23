@@ -20,7 +20,6 @@ def get_matches(es_, es_index, path):
     q = {
         "track_total_hits": True,
         "query": {"bool": {"must": [{"term": {"matches.keyword": path}}]}},
-
     }
     q2 = {
         "track_total_hits": True,
@@ -94,6 +93,7 @@ def fetch_es_record(key, item, es_, index="path-resolver-taxonomy"):
     :return:
     """
     import json
+
     resolver_dict = get_matches(es_=es_, es_index=index, path=key)
     try:
         c = resolver_dict["canonical"][0]
@@ -163,5 +163,3 @@ if __name__ == "__main__":
     chunked_highlights = [n for n in highlights if n]
     print(json.dumps(chunked_highlights, indent=2))
     # p_bulk(es_=es, iterator=chunked_highlights, index_="path-resolver-taxonomy", verbose=False)
-
-

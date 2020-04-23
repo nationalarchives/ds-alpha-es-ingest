@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_executor import Executor
 import os
 import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import pyodbc
 import settings
@@ -12,7 +13,7 @@ from es_docs import process_data
 import logging
 from waitress import serve
 
-logger = logging.getLogger('waitress')
+logger = logging.getLogger("waitress")
 logger.setLevel(logging.DEBUG)
 
 app = Flask(__name__)

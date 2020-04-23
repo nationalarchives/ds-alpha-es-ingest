@@ -97,8 +97,9 @@ def identify_guides(cat_ref, path, flattened_guides, integer_map):
     :return: dict with the guides for that object, and lettercode and series
     """
 
-    research_guides = dict(Object=flattened_guides.get(cat_ref),
-                           Department=flattened_guides.get(path["Department"]))
+    research_guides = dict(
+        Object=flattened_guides.get(cat_ref), Department=flattened_guides.get(path["Department"])
+    )
     if path.get("Series"):
         s = " ".join([path["Department"], path["Series"]])
         research_guides["Series"] = flattened_guides.get(s)

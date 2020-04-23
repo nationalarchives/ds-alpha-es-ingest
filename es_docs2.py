@@ -27,7 +27,7 @@ from settings import (
     es_resolver_index,
     es_port,
     es_host,
-    es_update
+    es_update,
 )
 import logging
 import certifi
@@ -557,7 +557,9 @@ def process_data(
             total = sum([int(v) for k, v in stats.items()])
             sleep_time = int(total / 100000)
             yield f"Received size from stats service and calculated sleep time between cycles as: {sleep_time}<br>"
-            es_logger.info(f"Received size from stats service and calculated sleep time between cycles as: {sleep_time}<br>")
+            es_logger.info(
+                f"Received size from stats service and calculated sleep time between cycles as: {sleep_time}<br>"
+            )
 
         else:
             sleep_time = 15
