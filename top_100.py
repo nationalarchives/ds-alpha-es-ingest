@@ -109,13 +109,14 @@ def ingest_list(item_list: List, index: str = "test-index") -> Dict:
         }
 
 
-def fetch_es_record(key, item, es_, index="path-resolver-mongo"):
+def fetch_es_record(key, item, es_, index="path-resolver-mongo", image_path_base=None):
     """
 
     :param key:
     :param item:
     :param es_:
     :param index
+    :param image_path_base: the location of the ds-alpha-analytics-service repo
     :return:
     """
     resolver_dict = get_matches(es_=es_, es_index=index, path=key)
@@ -181,26 +182,31 @@ def fetch_es_record(key, item, es_, index="path-resolver-mongo"):
             print(f"Doc has IIIF but no static image in analytics")
             print(f"{doc['iiif_thumb']}")
             image_id = doc["iiif_thumb"].split("/")[-5]
-            s_image_path = (
-                f"/Users/matt.mcgrattan/Documents/Github/ds-alpha-analytics-service/"
-                + f"docs/thumbs/{image_id}"
-            )
-            m_image_path = (
-                f"/Users/matt.mcgrattan/Documents/Github/ds-alpha-analytics-service/"
-                + f"docs/medium/{image_id}"
-            )
-            urllib.request.urlretrieve(doc["iiif_thumb"], s_image_path)
-            urllib.request.urlretrieve(doc["iiif_medium"], m_image_path)
-            doc["small_thumbs"].append(
-                f"https://nationalarchives.github.io/"
-                f"ds-alpha-analytics-service/"
-                f"thumbs/{image_id}"
-            )
-            doc["medium_thumbs"].append(
-                f"https://nationalarchives.github.io/"
-                f"ds-alpha-analytics-service/"
-                f"medium/{image_id}"
-            )
+            if image_path_base:
+                # s_image_path = (
+                #     f"/Users/matt.mcgrattan/Documents/Github/ds-alpha-analytics-service/"
+                #     + f"docs/thumbs/{image_id}"
+                # )
+                s_image_path = "".join([image_path_base,
+                                        f"docs/thumbs/{image_id}"])
+                # m_image_path = (
+                #     f"/Users/matt.mcgrattan/Documents/Github/ds-alpha-analytics-service/"
+                #     + f"docs/medium/{image_id}"
+                # )
+                m_image_path = "".join([image_path_base,
+                                        f"docs/medium/{image_id}"])
+                urllib.request.urlretrieve(doc["iiif_thumb"], s_image_path)
+                urllib.request.urlretrieve(doc["iiif_medium"], m_image_path)
+                doc["small_thumbs"].append(
+                    f"https://nationalarchives.github.io/"
+                    f"ds-alpha-analytics-service/"
+                    f"thumbs/{image_id}"
+                )
+                doc["medium_thumbs"].append(
+                    f"https://nationalarchives.github.io/"
+                    f"ds-alpha-analytics-service/"
+                    f"medium/{image_id}"
+                )
         doc["top_item"] = True
         ident_ = doc["id"]
         es_doc = {
