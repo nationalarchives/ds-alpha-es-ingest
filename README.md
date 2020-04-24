@@ -51,7 +51,7 @@ There is also a webservice which can be left running, and which can be used to t
 
 However, we didn't use this web service in any long-running ingests as the size of data (especially the taxonomy static files) makes it prone to falling over.
 
-## Basic structure of the codebase
+## Basic structure of the codebase and the logic for standard document handling
 
 The "master" functions are all in __es_docs.py__.
 
@@ -63,18 +63,53 @@ The logic is as follows:
 2) Fetch records from ILDB in chunks of 1000
 3) Zip together the field labels with the data to create a Python dictionary for each row in the table (a list of 1000 of these)
 4) Convert each of these dictionaries into an enriched format (also a dict) using the _make_canonical_ function. (as a list comprehension on the list of 1000)
+    * Generate the correct series label (to deal with series that have subclasses, e.g. CP 25/2)
+    * Create a "path" object which contains the correct Department, Division, Series, Subseries, Subsubseries, Piece, and Item for the object
+    * Identify which level, e.g. "piece" this object is and store as a simple key for lookup
+    * generate a properly formatted catalogue reference (there is a _construct_cat_ref_ function for this)
+    * generate a list of all possible _valid_ identifiers this object might match and store as a "matches" key (_generate_keys_ function)
+    * generate a list of possible matches or partial matches that might match this object via URL hacking (_make_frags_ function)
+    * call the _gen_date_ function (from data_handling.py) to create normalised start and end dates, and date objects with century, year, month, day.
+    * identify which _era_ this object falls in (using the eras from the Education website, via the _identify_eras_ function)
+    * identify which research guides this document is associated with (_identify_guides_ function from get_guides.py)
+    * identify which taxonomy terms are associated with this reference (using the _taxonomy_data_ which is loaded from sharded gzip files)
 5) Retrieve the Mongo data for this list of 1000 rows by calling _kentigern_ via an HTTP request. N.B. Kentigern works asynchronously and can handle the request for 1000 simultaneous records quickly.
+    * _get_mongo_: Accept a list of objects (produced as a list of objects per row produced using _make_canonical_), request the Mongo data from kentigern using an HTTP POST request.
+    * use _map_mongo_ function to replace the abbreviated field names with human readable field names
+    * if a spacy_nlp instance is available:
+        * flatten the data to a string suitable for named entity extraction
+        * run that string through named entity extract _string_to_entities_ (nlp.py)
+        * if the record is a Chancery record (lettercode C):
+            * extract Short Title, Plaintiff, Defendants from that description with assistance from Spacy NLP
+    * return the list of Objects back to _es_docs_ for further processing (step 6 below) 
 6) Convert this list of dicts (one per row) into Elasticsearch documents suitable for ingest into the ES index
 7) Index these into Elasticsearch using the parallel_bulk API provided by Elasticsearch (this is done in smaller chunks so as not to exceed the transport size allowed by Elastic's HTTP endpoint)
 
+Note that the process is driven from the cursor retrieval of records from ILDB. Only objects that have records in ILDB are processed this way.
 
+The ingest handles, on a reasonably provisioned machine, somewhere in the region of 30-40 records per second. This includes:
+
+* requests to ILDB
+* requests to Kentigern
+* named entity extraction and data normalisation
+* ingest into Elasticsearch via HTTP transport
+
+This is relatively fast considering what is being done, but as per above, this could be considerably improved via production code that:
+
+1) Targetted a specific data model
+2) Efficiently parallelised tasks
+3) Was written from the ground up for performance and reliability
+
+At 30-40 records per second that will still take 5 days to process the entirety of tNA's holdings. This was only done a few times throughout Alpha,
+so the top100 and medal card ingests were done as later processes, rather than doing them "in-line" during processing.
 
 ## Running at scale for ingest
 
 * es_docs
+* medal cards
+* top 100
 * highlights
-* reverse_mongo
-* top100
+
 
 
 
