@@ -103,42 +103,113 @@ This is relatively fast considering what is being done, but as per above, this c
 At 30-40 records per second that will still take 5 days to process the entirety of tNA's holdings. This was only done a few times throughout Alpha,
 so the top100 and medal card ingests were done as later processes, rather than doing them "in-line" during processing.
 
-## Running at scale for ingest
+# Ingesting Data
 
-* es_docs
-* medal cards
-* top 100
-* highlights
+## Records from ILDB
+
+See below for instructions on setting up network connections.
+
+1. Update settings.py if required
+    * change the ildb user and ildb password to the appropriate user name and password for the instance of ILDB on the Alpha AWS estate
+    * change the es_port to whatever Elasticsearch is available at in your environment (see below)
+    * change the es_index to the index in use (currently the "production" index on Alpha is `path-resolver-mongo`)
+2. Open es_docs.py
+    * set the `start` and `end` in the `process_data` lines at the end of the file to the lettercode you want to start with and the lettercode you want to end with.
+    * alternatively, set `lettercode` to a specific lettercode if you just want to ingest one department.
+    * if these are left as _None_ the system will start with lettercode A and run to the end (this will take several days)
+    * set `ingest` to `True`.
+3. Run `python es_docs.py` and the ingest will begin.
+
+In the intial ingest, I tended to run in 40-50 lettercodes at a time, and then check them.
+
+If you leave this at this point the services will mostly work, but:
+
+* there will be no medal card records
+* the top 100 will not be updated with images and flagged as top 100
+* the highlight items will not be flagged as highlights and updated with images.
+
+
+## Medal cards
+
+## Top 100
+
+## Highlights
 
 
 
 
+## Network connections and local running/testing
 
-## Local testing
+You can set up a Python 3.7 or 3.8 virtual environment, e.g. 
 
-Build the docker image.
+1. Ensure you have Python 3.7+ and pip installed
+2. Clone this repository
+3. Create a virtual environment with `python3 -m venv venv`
+4. From the root directory run `source venv/bin/activate`
+5. Install dependencies with `pip install -r requirements.txt`
+
+The code expects to have access to ILDB and Elasticsearch running on the Alpha AWS cluster. If you are running locally,
+this can be handled by SSH tunnelling via the Alpha bastion service.
+
+
+### Elasticsearch
+
+For example, to tunnel Elastic to port `9201` on hte local machine.
 
 ```bash
-docker build -t ingest .
+ssh -N -L 9201:vpc-dev-elasticsearch-6njgchnnn3kml3qbyhrp52gm.eu-west-2.es.amazonaws.com:443 ec2-user@ec2-3-10-202-210.eu-west-2.compute.amazonaws.com -i ~/.ssh/alpha-bastion.pem
 ```
 
-Run the image (e.g.on Mac).
+Add `vpc-dev-elasticsearch-6njgchnnn3kml3qbyhrp52gm.eu-west-2.es.amazonaws.com` to `/etc/hosts` to, if you want to
+allow certificate verification.
+
+e.g.
+
+```.env
+# Host Database
+#
+# localhost is used to configure the loopback interface
+# when the system is booting.  Do not change this entry.
+##
+127.0.0.1	localhost
+127.0.0.1	vpc-dev-elasticsearch-6njgchnnn3kml3qbyhrp52g37m.eu-west-2.es.amazonaws.com
+```
+
+### ILDB
 
 ```bash
-docker run -p 8000:8000 -e ildb_host=host.docker.internal -e ildb_user=USER -e ildb_password=PASSWORD -e es_host=host.docker.internal -e flask_local=True ingest
+ssh -N -L 1433:10.50.98.102:1433 ec2-user@ec2-3-10-202-210.eu-west-2.compute.amazonaws.com -i ~/.ssh/alpha-bastion.pem
 ```
 
-Make a request:
+Access to ILDB will need FreeTDS.
 
-[http://localhost:8000/ingest?start=A&end=C](http://localhost:8000/ingest?start=A&end=C)
+For example, on Ubuntu, you could install the freeTDS driver:
 
-If you want to push data (rather than just testing the basic connections) add the `action=True` parameter, e.g.
+```
+sudo apt-get install freetds-dev freetds-bin unixodbc-dev tdsodbc
+```
 
-[http://localhost:8000/ingest?lettercode=ADM&action=True](http://localhost:8000/ingest?lettercode=ADM&action=True)
+You will then need to create/edit `/etc/odbcinst.ini`:
 
+```
+[FreeTDS]
+Description=FreeTDS Driver
+Driver=/usr/lib/odbc/libtdsodbc.so
+Setup=/usr/lib/odbc/libtdsS.so
+```
 
+This will vary depending on OS, for example in Ubuntu 16.04 64 bit, this looks like:
 
-'Driver=FreeTDS;Server=host.docker.internal;Database=ILDB;UID=digirati;PWD=jaffaCAKES9;'
+```
+[FreeTDS]
+Description=FreeTDS Driver
+Driver=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so
+Setup=/usr/lib/x86_64-linux-gnu/odbc/libtdsS.so
+```
+
+#### OS X
+
+See: [https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Mac-OSX](https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Mac-OSX)
 
 
 
