@@ -162,4 +162,4 @@ if __name__ == "__main__":
     highlights = [fetch_es_record(*i, es) for i in identify_highlights()]
     chunked_highlights = [n for n in highlights if n]
     print(json.dumps(chunked_highlights, indent=2))
-    # p_bulk(es_=es, iterator=chunked_highlights, index_="path-resolver-taxonomy", verbose=False)
+    p_bulk(es_=es, iterator=chunked_highlights, index_="path-resolver-mongo", verbose=False)

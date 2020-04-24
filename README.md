@@ -145,10 +145,23 @@ This is a long running process, and might take 24 hours as there are many millio
 
 ## Top 100
 
+The top100 process involves fetching records from Elasticsearch, adding in some additional information, including images, and then pushing these back.
+
+This should not need to be run again, but if it is, you can:
+
+1. Set the `image_path_base` parameter in line 284 to wherever you have cloned: https://github.com/nationalarchives/ds-alpha-analytics-service
+2. In the same virtual env as above, run, `python top100.py`
+
+N.B. if `image_path_base` is not None, the code will attempt to fetch (via IIIF) any thumbnails that don't already exist in the Github pages for  https://github.com/nationalarchives/ds-alpha-analytics-service and store them ready for upload.
+This should not need done again, as any images that were present, should already be in the repo now.
 
 
 ## Highlights
 
+The Highlights process is similar to the top100 process. 
+
+1. Check the settings.py file (as per above)
+2. In the same virtual env as above, run, `python highlight_data.py`
 
 
 

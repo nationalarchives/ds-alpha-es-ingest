@@ -281,7 +281,7 @@ if __name__ == "__main__":
     )
     # Get the elasticrecords for the items identified as top100 items via the staticdata
     # Enrich in the process
-    highlights = [fetch_es_record(*i, es) for i in identify_tops()]
+    highlights = [fetch_es_record(*i, es, image_path_base=None) for i in identify_tops()]
     # filter out the empty records
     chunked_highlights = [n for n in highlights if n]
     # create a pruned version which was used to dump to file in diagnosing the original ingest
