@@ -162,7 +162,6 @@ def map_mongo(mong_data=None):
 
 def reverse_mong(letter_code, division, series, piece, level="Item", max_id_range=260000):
     """
-    Generator that yields ids in 200 id chunks suitable for passing to Kentigern
 
     :param letter_code
     :param division
@@ -198,6 +197,7 @@ def iterate_reverse_mong(rev, nlp_proc=None, piece=None):
 
     :param rev:
     :param nlp_proc: optional spacy NLP model
+    :param piece:
     :return:
     """
     count = 0
@@ -289,6 +289,7 @@ if __name__ == "__main__":
             }
         ]
     )
+    # ======= Uncomment me to run the medal cards. =========
     # for piece_ in range(1, 30):
     #     print(f"Working on {piece_} of 30")
     #     es.indices.put_settings(index=es_index, body=es_index_settings)
@@ -301,3 +302,4 @@ if __name__ == "__main__":
     #         ingest=True,
     #     )
     #     es.indices.put_settings(index=es_index, body=es_index_done_settings)
+    # ===========================================================

@@ -120,6 +120,8 @@ See below for instructions on setting up network connections.
     * set `ingest` to `True`.
 3. Run `python es_docs.py` and the ingest will begin.
 
+The machine you are using should have at least 8GB of RAM or be able to efficiently swap to handle the fact that at its peak, the ingest will use a little over 7GB of RAM.
+
 In the intial ingest, I tended to run in 40-50 lettercodes at a time, and then check them.
 
 If you leave this at this point the services will mostly work, but:
@@ -131,7 +133,19 @@ If you leave this at this point the services will mostly work, but:
 
 ## Medal cards
 
+There is a function called _medal_cards_ in `mongo_grabber.py` which can be used to generate all of the medal card data.
+This code will iterate a list of pieces (generated via a simple "range" in Python) which collectively comprise all of the medal cards in WO 372, fetch the data from Mongo via Kentigern, generate the ILDB-like data (in the reverse of the usual process) and then push these to Elastic.
+
+To run this:
+
+1. Edit `mongo_grabber.py` to uncomment the last 12 lines (it will be obvious which lines)
+2. In the same virtual env as above, run `python mongo_grabber.py`
+
+This is a long running process, and might take 24 hours as there are many millions of medal card records.
+
 ## Top 100
+
+
 
 ## Highlights
 
